@@ -1,15 +1,22 @@
 ---
 // The site header on every page. The brand is a link, not a heading, so each
-// page keeps its own single h1.
-const path = Astro.url.pathname;
+// page keeps its own single h1. The last link is the same page in the other
+// language.
+import { counterpart, type Locale, STRINGS } from "../lib/i18n";
+
+const { locale } = Astro.props as { locale: Locale };
+const t = STRINGS[locale];
+const other = STRINGS[locale === "en" ? "zh" : "en"];
+const path = Astro.url.pathname.slice(t.prefix.length);
 ---
 
 <header class="site-header">
   <div class="site-header-inner">
-    <a class="brand" href="/">ANU Timetable</a>
-    <nav aria-label="site">
-      <a href="/" aria-current={path === "/" ? "page" : undefined}>Timetable</a>
-      <a href="/readme/" aria-current={path.startsWith("/readme") ? "page" : undefined}>About</a>
+    <a class="brand" href={`${t.prefix}/`}>{t.siteTitle}</a>
+    <nav aria-label={t.siteNav}>
+      <a href={`${t.prefix}/`} aria-current={path === "/" ? "page" : undefined}>{t.timetable}</a>
+      <a href={`${t.prefix}/readme/`} aria-current={path.startsWith("/readme") ? "page" : undefined}>{t.about}</a>
+      <a href={counterpart(Astro.url, locale)} lang={other.lang} hreflang={other.lang}>{t.otherLanguage}</a>
     </nav>
   </div>
 </header>

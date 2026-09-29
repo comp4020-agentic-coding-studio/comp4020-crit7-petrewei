@@ -7,7 +7,6 @@ export type Meeting = {
 
 export type Commitment<M extends Meeting = Meeting> = {
   id: string;
-  label: string;
   // A lab or tutorial, where the student has a group to choose; a lecture has one.
   choosable: boolean;
   meetings: M[];

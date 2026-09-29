@@ -7,6 +7,7 @@ import {
   weekdayOf,
 } from "./clash";
 import { db } from "./db";
+import type { EntryName } from "./i18n";
 import { activities, allocations, courses, groups, meetings } from "./schema";
 
 type MeetingView = typeof meetings.$inferSelect;
@@ -31,7 +32,8 @@ type ActivityView = {
 // Labs and tutorials have more than one group to choose from. The
 // commitments are every lecture plus the allocated group of each lab and
 // tutorial: the recorded one, else the allocation copied from MyTimetable.
-type Timetable = { choosable: ActivityView[]; commitments: Commitment<MeetingView>[] };
+type Item = Commitment<MeetingView> & { name: EntryName };
+type Timetable = { choosable: ActivityView[]; commitments: Item[] };
 
 export function loadTimetable(): Timetable {
   const courseRows = new Map(db.select().from(courses).all().map((c) => [c.code, c]));
@@ -71,13 +73,16 @@ export function loadTimetable(): Timetable {
   return { choosable: views.filter((a) => a.groups.length > 1), commitments };
 }
 
-const commitment = (activity: ActivityView, group: GroupView): Commitment<MeetingView> => {
+const commitment = (activity: ActivityView, group: GroupView): Item => {
   const choosable = activity.groups.length > 1;
   return {
     id: group.id,
-    label: choosable
-      ? `${activity.courseCode} ${activity.kind} group ${group.label}`
-      : `${activity.courseCode} ${activity.kind} (${activity.code})`,
+    name: {
+      courseCode: activity.courseCode,
+      kind: activity.kind,
+      code: activity.code,
+      group: choosable ? group.label : null,
+    },
     choosable,
     meetings: group.meetings,
   };
@@ -104,7 +109,7 @@ function todayInCanberra(): number {
 // meeting and the last week holds the last meeting. `requested` is the ?week
 // parameter; anything but a week in range shows the week holding today,
 // or the nearest end of the semester.
-export function weekView(calendar: Commitment<MeetingView>[], requested: string | null) {
+export function weekView(calendar: Item[], requested: string | null) {
   const dates = calendar.flatMap((item) => item.meetings.flatMap((m) => [...parseWeeks(m.weeks)]));
   const firstMonday = Math.min(...dates) - weekdayOf(Math.min(...dates));
   const weekOf = (day: number) => Math.floor((day - firstMonday) / 7) + 1;
@@ -122,7 +127,7 @@ export function weekView(calendar: Commitment<MeetingView>[], requested: string 
     const entries = calendar
       .flatMap((item) =>
         item.meetings
-          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, title: item.label, choosable: item.choosable, meeting }))
+          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, name: item.name, choosable: item.choosable, meeting }))
           .filter(({ meeting }) => meeting.day === day && parseWeeks(meeting.weeks).has(date)),
       )
       .sort((a, b) => a.meeting.start.localeCompare(b.meeting.start));

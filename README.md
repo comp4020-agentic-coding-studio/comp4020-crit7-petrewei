@@ -15,6 +15,7 @@ It models my own Second Semester 2026 timetable (COMP3300, COMP3500 and COMP4020
 - **Your week.** A Monday-to-Friday calendar of your lectures and allocated groups for the chosen teaching week, with previous and next week links.
 - **Clashes on the right dates.** Two meetings clash when they fall on the same weekday, overlap in time, and share a date. A one-off meeting clashes only in its own week: the COMP3500 lecture on 30 July clashes with lab 01 that week alone.
 - **No JavaScript needed.** Each Allocate button is a form button and week navigation is plain links, and the server rejects a group the activity does not have.
+- **Simplified Chinese.** Both pages are also at `/zh/` and `/zh/readme/`, with course titles and labels translated and course codes, activity codes, group labels, rooms and times left as MyTimetable gives them.
 
 ## Data
 
@@ -47,7 +48,7 @@ The dev server runs at <http://localhost:4321>. The database is created at `.dat
 
 ## Testing
 
-The tests in `spec/` boot the built server against a fresh database and cover persistence across a reload and a restart, the page's own form, the rejected requests, the clash rule, that every group comes from the MyTimetable copy, and that no feed URL or uni ID is committed. Whether the page is clearer than MyTimetable and reads well on a phone is left to judgement in a browser.
+The tests in `spec/` boot the built server against a fresh database and cover persistence across a reload and a restart, the page's own form, the rejected requests, the clash rule, the Chinese pages, that every group comes from the MyTimetable copy, and that no feed URL or uni ID is committed. Whether the page is clearer than MyTimetable and reads well on a phone is left to judgement in a browser.
 
 ## Deployment
 
@@ -56,8 +57,9 @@ Every push to `main` runs the checks in GitHub Actions and, when they pass, depl
 ## Project Layout
 
 - `src/data/timetable-2026-s2.json`: the timetable copied from MyTimetable
-- `src/lib/`: the schema, seed, clash rule and week view
-- `src/pages/index.astro`: the groups and the week calendar
+- `src/lib/`: the schema, seed, clash rule, week view and translations
+- `src/components/Timetable.astro`: the groups and the week calendar, served at `/` and `/zh/`
+- `README.zh-CN.md`: this readme in Simplified Chinese, served at `/zh/readme/`
 - `src/pages/api/allocation.ts`: records an allocation
 - `spec/`: tests against the built server
 - `drizzle/`: committed migrations

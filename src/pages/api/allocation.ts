@@ -1,9 +1,10 @@
 import type { APIRoute } from "astro";
 import { choosableLabels, saveAllocation } from "../../lib/allocation";
 
-// Each Allocate button on the page posts its activity, group and the
-// week on screen, so the form needs no JavaScript and the 303 re-renders that
-// week from SQLite. Any client can post here, so activity and group are checked.
+// Each Allocate button on the page posts its activity, group, the week on
+// screen and, from the Chinese page, locale=zh, so the form needs no
+// JavaScript and the 303 re-renders that week from SQLite. Any client can
+// post here, so activity and group are checked.
 export const POST: APIRoute = async ({ request, redirect }) => {
   // formData() throws on a body that is not a form, such as JSON.
   const form = await request.formData().catch(() => null);
@@ -22,9 +23,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
 
   saveAllocation(activity, group);
-  // Go back to the week that was on screen; the page checks the range itself.
+  // Go back to the week that was on screen, in the page's language; the page
+  // checks the range itself. Only a known locale may choose the path.
   const week = String(form.get("week") ?? "");
-  return redirect(/^\d{1,2}$/.test(week) ? `/?week=${week}` : "/", 303);
+  const prefix = form.get("locale") === "zh" ? "/zh" : "";
+  return redirect(/^\d{1,2}$/.test(week) ? `${prefix}/?week=${week}` : `${prefix}/`, 303);
 };
 
 const reject = (reason: string) =>

@@ -1,0 +1,144 @@
+---
+// The timetable page, in the locale its route under src/pages gives it.
+import { isOneOff } from "../lib/clash";
+import { type Locale, STRINGS } from "../lib/i18n";
+import { loadTimetable, weekView } from "../lib/timetable";
+import Header from "./Header.astro";
+import "../styles.css";
+
+const { locale } = Astro.props as { locale: Locale };
+const t = STRINGS[locale];
+const { choosable, commitments } = loadTimetable();
+const week = weekView(commitments, Astro.url.searchParams.get("week"));
+const weekHref = (n: number) => `${t.prefix}/?week=${n}`;
+
+const freeText = (free: number | null): string => (free === null ? "" : t.free(free));
+
+const datesText = (weeks: string): string => (isOneOff(weeks) ? t.oneOff(weeks) : weeks.replaceAll("-", "–"));
+
+// A card shows a group's regular times. A makeup, such as a tutorial moved
+// for a public holiday, is listed only in the details.
+const isMakeup = (meeting: { type: string }): boolean => meeting.type.endsWith("Makeup");
+const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.filter((m) => !isMakeup(m));
+---
+
+<!doctype html>
+<html lang={t.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.siteTitle}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <Header locale={locale} />
+    <main>
+      <h1>{t.heading}</h1>
+      <p class="lede">{t.lede}</p>
+
+      <div class="activities">
+        {
+          choosable.map((activity) => (
+            <section class="activity" data-activity={activity.id} aria-labelledby={`heading-${activity.id}`}>
+              <h2 id={`heading-${activity.id}`}>
+                {activity.courseCode} {t.term(activity.kind)}
+              </h2>
+              <p class="course">{t.courseTitle(activity.courseCode, activity.courseTitle)}</p>
+              <form method="post" action="/api/allocation">
+                <input type="hidden" name="activity" value={activity.id} />
+                <input type="hidden" name="week" value={week.number} />
+                {locale !== "en" && <input type="hidden" name="locale" value={locale} />}
+                <ul class="groups">
+                  {activity.groups.map((group) => (
+                    <li
+                      class="card"
+                      data-group={group.id}
+                      data-allocated={group.allocated ? "" : undefined}
+                    >
+                      <div class="card-head">
+                        <span class="group-name">{t.group(group.label)}</span>
+                        <button
+                          name="group"
+                          value={group.label}
+                          disabled={group.allocated}
+                          aria-label={group.allocated ? t.allocatedLabel(group.label) : t.allocateLabel(group.label)}
+                        >
+                          {group.allocated ? t.allocated : t.allocate}
+                        </button>
+                      </div>
+                      {regular(group.meetings).map((meeting) => (
+                        <p class="when">
+                          {t.day(meeting.day)} {meeting.start}–{meeting.end}
+                        </p>
+                      ))}
+                      <p class:list={["free", { full: group.free === 0 }]}>{freeText(group.free)}</p>
+                      <details>
+                        <summary>{t.details}</summary>
+                        <ul class="meetings">
+                          {group.meetings.map((meeting) => (
+                            <li>
+                              <span class="meeting-type">
+                                {t.term(meeting.type)} {meeting.activity}
+                              </span>
+                              <span>
+                                {isMakeup(meeting) && t.makeupAt(`${t.day(meeting.day)} ${meeting.start}–${meeting.end}`)}
+                                {datesText(meeting.weeks)}
+                              </span>
+                              <span>{meeting.location}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    </li>
+                  ))}
+                </ul>
+              </form>
+            </section>
+          ))
+        }
+      </div>
+
+      <section class="week-section" aria-labelledby="heading-week" data-week={week.number}>
+        <h2 id="heading-week">{t.yourWeek}</h2>
+        <p class="course">{t.weekIntro}</p>
+        <nav class="week-nav" aria-label={t.weeksNav}>
+          {week.prev ? <a href={weekHref(week.prev)} rel="prev">{t.previousWeek}</a> : <span />}
+          <span class="week-range">
+            {t.weekRange(
+              week.number,
+              `${t.day(week.days[0].day)} ${week.days[0].date}`,
+              `${t.day(week.days[4].day)} ${week.days[4].date}`,
+            )}
+          </span>
+          {week.next ? <a href={weekHref(week.next)} rel="next">{t.nextWeek}</a> : <span />}
+        </nav>
+        <div class="week">
+          {
+            week.days.map(({ day, date, entries }) => (
+              <div class="day" data-date={date}>
+                <h3>
+                  {t.day(day)} {date}
+                </h3>
+                <ul>
+                  {entries.length === 0 && <li class="slot-empty">{t.nothingOn}</li>}
+                  {entries.map((entry) => (
+                    <li data-slot={entry.key} class:list={{ choosable: entry.choosable, "slot-clash": entry.clash }}>
+                      <span class="slot-time">
+                        {entry.meeting.start}–{entry.meeting.end}
+                      </span>
+                      <span class="slot-title">{t.entry(entry.name)}</span>
+                      <span class="slot-where">{entry.meeting.location}</span>
+                      {entry.meeting.staff && <span class="slot-where">{entry.meeting.staff}</span>}
+                      {isMakeup(entry.meeting) && <span class="slot-note">{t.term(entry.meeting.type)}</span>}
+                      {entry.clash && <span class="slot-note slot-clash-note">{t.clash}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
