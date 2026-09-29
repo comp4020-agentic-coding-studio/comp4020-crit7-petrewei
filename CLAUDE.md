@@ -99,7 +99,7 @@ This crit's written account is `PROCESS.md` plus the reflection in `reflections/
 ## 9 Markdown
 
 - Follow `markdownlint` except `MD013`, and keep each prose paragraph on a single line. A hard-wrapped rewrap diffs every line and buries the sentence that changed.
-- After creating or modifying Markdown files, run `markdownlint-cli2 --config ~/.markdownlint-cli2.yaml` on them and fix everything it reports.
+- After creating or modifying Markdown files, run `markdownlint-cli2` on them and fix everything it reports. It reads `.markdownlint-cli2.yaml` in the repo root, which disables `MD013`.
 - **Number document subheadings, and set them in Title Case.** `## 1 Heading Level 2`, then `### 1.1 Heading Level 3`, so a section can be cited by number; the `# Title` is not numbered. Documents only — `CLAUDE.md`, `PROCESS.md` — never `README.md`, which the app serves at `/readme/` as its own prose.
 
 ## 10 Maintaining This File
