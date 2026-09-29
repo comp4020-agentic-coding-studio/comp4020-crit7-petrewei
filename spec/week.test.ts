@@ -1,5 +1,5 @@
-import { JSDOM } from "jsdom";
-import { beforeEach, describe, expect, inject, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { LAB, page, record, restoreAllocation, TUT } from "./app";
 
 // Contract for "Your week", checked over HTTP against the built app:
 // - GET /?week=N shows one Mon–Fri week as [data-week="N"]. Week 1 starts on
@@ -13,33 +13,11 @@ import { beforeEach, describe, expect, inject, it } from "vitest";
 //   are absent at either end.
 // - Without ?week, or with one outside 1–14, the page shows the week holding
 //   today's date in Canberra, or the nearest end of the semester.
-const baseUrl = inject("baseUrl");
-
-const LAB = "COMP3300-ComA";
-const TUT = "COMP4020-TutA";
 const LAST_WEEK = 14;
 
-const record = async (activity: string, group: string) => {
-  const res = await fetch(new URL("/api/allocation", baseUrl), {
-    method: "POST",
-    headers: { origin: baseUrl },
-    body: new URLSearchParams({ activity, group }),
-    redirect: "manual",
-  });
-  expect(res.status, `recording ${activity} ${group}`).toBe(303);
-};
+beforeEach(restoreAllocation);
 
-// MyTimetable's allocation: lab 04 and tutorial 03.
-beforeEach(async () => {
-  await record(LAB, "04");
-  await record(TUT, "03");
-});
-
-const weekPage = async (query = ""): Promise<Document> => {
-  const res = await fetch(new URL(`/${query}`, baseUrl));
-  expect(res.status).toBe(200);
-  return new JSDOM(await res.text()).window.document;
-};
+const weekPage = (query = ""): Promise<Document> => page(`/${query}`);
 
 const shownWeek = (doc: Document): number => {
   const weeks = doc.querySelectorAll("[data-week]");

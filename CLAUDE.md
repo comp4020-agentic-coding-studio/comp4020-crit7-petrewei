@@ -11,7 +11,7 @@ Crit 7, week 8: build the ANU system you wish existed. The slice is my MyTimetab
 Where each spec line is held:
 
 - **Loads at its `*.fly.dev` URL by the cutoff:** checked by hand after every deploy (§4).
-- **Core flow persists across a reload:** `spec/timetable.test.ts`, which also holds the clash contract, and `spec/restart.test.ts` for a restart.
+- **Core flow persists across a reload:** `spec/timetable.test.ts`, and `spec/restart.test.ts` for a restart. The clash contract is in `spec/clash.test.ts` and `spec/week.test.ts`.
 - **Commits, `PROCESS.md` and `reflections/crit-7.md`:** `pnpm check:evidence`.
 - **A real ANU slice, and how I directed, grounded and corrected the work:** judged at the crit.
 

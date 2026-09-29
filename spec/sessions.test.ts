@@ -1,53 +1,42 @@
 import { readFileSync } from "node:fs";
-import { JSDOM } from "jsdom";
-import { beforeAll, expect, inject, it } from "vitest";
+import { expect, it } from "vitest";
+import { page } from "./app";
 
 // Every group the page shows must come from the MyTimetable copy, and every
 // choosable activity must list exactly its groups there: an invented or dropped
 // session makes every clash result untrue.
-const baseUrl = inject("baseUrl");
-
+type Meeting = { type: string; activity: string; staff: string | null };
 type Timetable = {
-  courses: { code: string; activities: { code: string; groups: { group: string }[] }[] }[];
+  courses: {
+    code: string;
+    class: string;
+    activities: { code: string; kind: string; groups: { group: string; meetings: Meeting[] }[] }[];
+  }[];
 };
 const timetable: Timetable = JSON.parse(readFileSync("src/data/timetable-2026-s2.json", "utf8"));
 
-const activities = timetable.courses.flatMap((course) =>
-  course.activities.map((activity) => ({
-    id: `${course.code}-${activity.code}`,
-    groups: activity.groups.map((g) => `${course.code}-${activity.code}-${g.group}`),
-  })),
-);
-const knownGroups = new Set(activities.flatMap((a) => a.groups));
-
-let doc: Document;
-beforeAll(async () => {
-  doc = new JSDOM(await (await fetch(baseUrl)).text()).window.document;
-});
-
-it("shows no group that is not in the MyTimetable copy", () => {
-  const shown = [...doc.querySelectorAll("[data-group]")].map((el) => el.getAttribute("data-group") ?? "");
-  expect(shown.length, "the page shows no [data-group] elements").toBeGreaterThan(0);
-  expect(shown.filter((g) => !knownGroups.has(g))).toEqual([]);
-});
-
-it("lists exactly the MyTimetable groups for every choosable activity", () => {
-  for (const activity of activities.filter((a) => a.groups.length > 1)) {
-    const listed = [...doc.querySelectorAll(`[data-activity="${activity.id}"] [data-group]`)].map(
-      (el) => el.getAttribute("data-group") ?? "",
-    );
-    expect([...listed].sort(), activity.id).toEqual([...activity.groups].sort());
-  }
+// Each choosable activity's groups as the page tags them, in the copy's order,
+// which is label order.
+it("lists exactly the MyTimetable groups of each lab and tutorial, in label order", async () => {
+  const expected = timetable.courses.flatMap((course) =>
+    course.activities
+      .filter((activity) => activity.groups.length > 1)
+      .flatMap((activity) => {
+        const id = `${course.code}-${activity.code}`;
+        return activity.groups.map((g) => `${id} ${id}-${g.group}`);
+      }),
+  );
+  const shown = [...(await page()).querySelectorAll("[data-group]")].map(
+    (el) => `${el.closest("[data-activity]")?.getAttribute("data-activity")} ${el.getAttribute("data-group")}`,
+  );
+  expect(expected.length).toBeGreaterThan(0);
+  expect(shown).toEqual(expected);
 });
 
 // The details page gives every meeting a type and an activity code, and every
 // lecture a lecturer; a meeting missing them was not copied from it.
 it("carries MyTimetable's type and activity code on every meeting", () => {
-  type Meeting = { type: string; activity: string; staff: string | null };
-  const raw = JSON.parse(readFileSync("src/data/timetable-2026-s2.json", "utf8")) as {
-    courses: { class: string; activities: { kind: string; groups: { meetings: Meeting[] }[] }[] }[];
-  };
-  for (const course of raw.courses) {
+  for (const course of timetable.courses) {
     expect(course.class).toMatch(/^\d{4}$/);
     for (const activity of course.activities) {
       for (const meeting of activity.groups.flatMap((g) => g.meetings)) {

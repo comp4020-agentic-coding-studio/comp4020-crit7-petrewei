@@ -4,8 +4,8 @@ import { mkdtempSync } from "node:fs";
 import { type AddressInfo, createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { JSDOM } from "jsdom";
 import { afterEach, expect, it } from "vitest";
+import { LAB, page, record } from "./app";
 
 // Fly keeps the database on a volume, so every restart and deploy boots the
 // app against data that is already there. The shared test server always gets a
@@ -51,29 +51,21 @@ const boot = async (databasePath: string): Promise<string> => {
   throw new Error(`server did not come up at ${baseUrl}`);
 };
 
-const groupsOnPage = async (baseUrl: string): Promise<string[]> => {
-  const doc = new JSDOM(await (await fetch(baseUrl)).text()).window.document;
-  return [...doc.querySelectorAll("[data-group]")].map(
+const groupsOnPage = async (baseUrl: string): Promise<string[]> =>
+  [...(await page("/", baseUrl)).querySelectorAll("[data-group]")].map(
     (el) => `${el.getAttribute("data-group")}${el.hasAttribute("data-allocated") ? " allocated" : ""}`,
   );
-};
 
 it("keeps the seeded groups and a recorded allocation across a restart", async () => {
   const databasePath = join(mkdtempSync(join(tmpdir(), "restart-db-")), "app.db");
 
   const baseUrl = await boot(databasePath);
   // A fresh database shows the allocation copied from MyTimetable.
-  expect(await groupsOnPage(baseUrl)).toContain("COMP3300-ComA-04 allocated");
-  const saved = await fetch(new URL("/api/allocation", baseUrl), {
-    method: "POST",
-    headers: { origin: baseUrl },
-    body: new URLSearchParams({ activity: "COMP3300-ComA", group: "02" }),
-    redirect: "manual",
-  });
-  expect(saved.status).toBe(303);
+  expect(await groupsOnPage(baseUrl)).toContain(`${LAB}-04 allocated`);
+  await record(LAB, "02", baseUrl);
   const first = await groupsOnPage(baseUrl);
-  expect(first).toContain("COMP3300-ComA-02 allocated");
-  expect(first).toContain("COMP3300-ComA-04");
+  expect(first).toContain(`${LAB}-02 allocated`);
+  expect(first).toContain(`${LAB}-04`);
   await stop();
 
   const second = await groupsOnPage(await boot(databasePath));

@@ -1,10 +1,11 @@
-import { JSDOM } from "jsdom";
-import { afterAll, describe, expect, inject, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocation, TUT } from "./app";
 
 // Contract for the allocation page, checked over HTTP against the built app:
 // - GET / lists each lab and tutorial as [data-activity="COURSE-ACT"], holding
-//   its groups as [data-group="COURSE-ACT-NN"] in label order, 01 first. The
-//   allocated group, and only that one, carries data-allocated.
+//   its groups as [data-group="COURSE-ACT-NN"] (spec/sessions.test.ts checks
+//   which, in label order). The allocated group, and only that one, carries
+//   data-allocated.
 // - POST /api/allocation with activity=COURSE-ACT and group=NN records the
 //   allocation and redirects back to / with 303.
 // - The page's own form for an activity submits those two fields, so the form
@@ -23,41 +24,6 @@ import { afterAll, describe, expect, inject, it } from "vitest";
 // - Clashes are shown only in the week calendar, on the date they happen
 //   (spec/week.test.ts), so no group in the list is flagged or names a clash.
 // Data is the real S2 2026 timetable in src/data/timetable-2026-s2.json.
-const baseUrl = inject("baseUrl");
-
-const LAB = "COMP3300-ComA";
-const TUT = "COMP4020-TutA";
-
-// Astro rejects form POSTs without a same-origin Origin header (CSRF check).
-const record = (activity: string, group: string) =>
-  fetch(new URL("/api/allocation", baseUrl), {
-    method: "POST",
-    headers: { origin: baseUrl },
-    body: new URLSearchParams({ activity, group }),
-    redirect: "manual",
-  });
-
-// An allocation the test depends on, so a failed save fails here.
-const setAllocation = async (activity: string, group: string) => {
-  const res = await record(activity, group);
-  expect(res.status, `setting up ${activity}`).toBe(303);
-};
-
-const page = async (): Promise<Document> => {
-  const res = await fetch(baseUrl);
-  expect(res.status).toBe(200);
-  return new JSDOM(await res.text()).window.document;
-};
-
-const groupsOf = (doc: Document, activity: string): string[] =>
-  [...doc.querySelectorAll(`[data-activity="${activity}"] [data-group]`)].map(
-    (el) => el.getAttribute("data-group") ?? "",
-  );
-
-const allocatedOf = (doc: Document, activity: string): string[] =>
-  [...doc.querySelectorAll(`[data-activity="${activity}"] [data-group][data-allocated]`)].map(
-    (el) => el.getAttribute("data-group") ?? "",
-  );
 
 const groupItem = (doc: Document, group: string): Element => {
   const el = doc.querySelector(`[data-group="${group}"]`);
@@ -74,90 +40,51 @@ const formFor = (doc: Document, activity: string): HTMLFormElement => {
   return form;
 };
 
-// What a browser sends when `submitter` is pressed, urlencoded as a form is.
-const formData = (form: HTMLFormElement, submitter: HTMLButtonElement): URLSearchParams => {
-  const data = new form.ownerDocument.defaultView!.FormData(form, submitter);
-  return new URLSearchParams([...data].map(([name, value]) => [name, String(value)]));
-};
-
-// Leave MyTimetable's allocation in place for the other spec files.
-afterAll(async () => {
-  await setAllocation(LAB, "04");
-  await setAllocation(TUT, "03");
-});
+beforeEach(restoreAllocation);
 
 describe("allocation", () => {
-  it("lists each activity's groups in label order", async () => {
-    const doc = await page();
-    expect(groupsOf(doc, LAB)).toEqual(["01", "02", "03", "04"].map((g) => `${LAB}-${g}`));
-    expect(groupsOf(doc, TUT)).toEqual(["01", "02", "03", "04", "05", "06"].map((g) => `${TUT}-${g}`));
-  });
-
   it("keeps a recorded allocation across a reload, in the same order", async () => {
-    const res = await record(LAB, "02");
+    const res = await post(new URLSearchParams({ activity: LAB, group: "02" }));
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("/");
-    await setAllocation(TUT, "05");
+    await record(TUT, "05");
 
     const doc = await page();
     expect(allocatedOf(doc, LAB)).toEqual([`${LAB}-02`]);
     expect(allocatedOf(doc, TUT)).toEqual([`${TUT}-05`]);
-    expect(groupsOf(doc, LAB)[0]).toBe(`${LAB}-01`);
+    expect(groupsOf(doc, LAB)).toEqual(["01", "02", "03", "04"].map((g) => `${LAB}-${g}`));
   });
 
   // A renamed field in the form would lose allocations while the direct POSTs
-  // above stay green (Lecture 7), so submit the page's own form.
-  it("records an allocation submitted through the page's own form", async () => {
-    await setAllocation(LAB, "04");
-    const doc = await page();
-    const form = formFor(doc, LAB);
-    expect(form.getAttribute("method")?.toLowerCase()).toBe("post");
+  // above stay green (Lecture 7), so submit the page's own form, as a browser
+  // without JavaScript does when group 01's button is pressed.
+  it("records a group through the page's own form and returns to the week being viewed", async () => {
+    const form = formFor(await page("/?week=3"), TUT);
+    expect(form.method).toBe("post");
     expect(new URL(form.action, baseUrl).pathname).toBe("/api/allocation");
-
-    // Without JavaScript, a button named `group` must carry another group.
-    const submitter = [...form.querySelectorAll("button")].find(
-      (b) => b.name === "group" && b.value === "03",
-    );
-    if (!submitter) throw new Error("no button named `group` with the value 03");
-    const data = formData(form, submitter);
-    expect(data.get("activity")).toBe(LAB);
-    expect(data.getAll("group")).toEqual(["03"]);
-
-    const res = await fetch(new URL("/api/allocation", baseUrl), {
-      method: "POST",
-      headers: { origin: baseUrl },
-      body: data,
-      redirect: "manual",
-    });
-    expect(res.status).toBe(303);
-    expect(allocatedOf(await page(), LAB)).toEqual([`${LAB}-03`]);
-  });
-
-  it("returns to the week being viewed, showing the new allocation", async () => {
-    await setAllocation(TUT, "03");
-    const res0 = await fetch(new URL("/?week=3", baseUrl));
-    const doc = new JSDOM(await res0.text()).window.document;
-    const form = formFor(doc, TUT);
     const submitter = [...form.querySelectorAll("button")].find((b) => b.name === "group" && b.value === "01");
     if (!submitter) throw new Error("no button named `group` with the value 01");
 
-    const res = await fetch(new URL("/api/allocation", baseUrl), {
-      method: "POST",
-      headers: { origin: baseUrl },
-      body: formData(form, submitter),
-      redirect: "manual",
-    });
+    const data = new form.ownerDocument.defaultView!.FormData(form, submitter);
+    const body = new URLSearchParams([...data].map(([name, value]) => [name, String(value)]));
+    expect([...body].sort()).toEqual([
+      ["activity", TUT],
+      ["group", "01"],
+      ["week", "3"],
+    ]);
+
+    const res = await post(body);
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("/?week=3");
 
-    const after = await fetch(new URL(res.headers.get("location")!, baseUrl));
-    const week = new JSDOM(await after.text()).window.document;
-    expect(week.querySelector("[data-week]")?.getAttribute("data-week")).toBe("3");
-    const monday = week.querySelector('[data-week] [data-date="10/8"]')?.textContent ?? "";
+    const after = await page(res.headers.get("location")!);
+    expect(allocatedOf(after, TUT)).toEqual([`${TUT}-01`]);
+    expect(after.querySelector("[data-week]")?.getAttribute("data-week")).toBe("3");
+    const monday = after.querySelector('[data-week] [data-date="10/8"]')?.textContent ?? "";
     expect(monday.replace(/\s+/g, " ")).toMatch(/14:00–15:30.*COMP4020 Tutorial group 01/);
   });
 
-  // Tutorial 01 meets on Mondays, and on Tue 6/10 in week 9 for Labour Day.
+  // Tutorial 01 meets on Mondays, and on Tue 6/10 in week 11 for Labour Day.
   it("shows only a group's regular times on its card", async () => {
     const card = groupItem(await page(), `${TUT}-01`);
     const times = [...card.querySelectorAll(":scope > .when")].map((el) => el.textContent?.trim());
@@ -165,17 +92,17 @@ describe("allocation", () => {
     expect(card.querySelector("details")?.textContent).toMatch(/Tue 14:00–15:30.*6\/10 only/s);
   });
 
+  // Booleans and strings only: printing a jsdom element in a failure throws.
   it("puts Allocate beside each group's name, and a disabled Allocated on the allocated one", async () => {
-    await setAllocation(LAB, "04");
     const doc = await page();
-    const heads = ["01", "02", "03", "04"].map((g) => {
+    const buttons = ["01", "02", "03", "04"].map((g) => {
       const card = groupItem(doc, `${LAB}-${g}`);
-      expect(card.querySelector("details button") === null, `no button in the details of ${g}`).toBe(true);
+      const all = card.querySelectorAll("button");
       const button = card.querySelector<HTMLButtonElement>(".card-head button");
-      if (!button) throw new Error(`no button beside the name of group ${g}`);
+      if (all.length !== 1 || all[0] !== button) throw new Error(`group ${g} needs one button, beside its name`);
       return [button.textContent?.trim(), button.name, button.value, button.disabled];
     });
-    expect(heads).toEqual([
+    expect(buttons).toEqual([
       ["Allocate", "group", "01", false],
       ["Allocate", "group", "02", false],
       ["Allocate", "group", "03", false],
@@ -186,7 +113,7 @@ describe("allocation", () => {
   it("names each activity's course by its title alone", async () => {
     const doc = await page();
     const course = (activity: string) =>
-      doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+      doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ").trim();
     expect(course(LAB)).toBe("Operating Systems Implementation");
     expect(course(TUT)).toBe("Advanced Topics in Human-Centred Agentic Coding Studio");
   });
@@ -208,11 +135,10 @@ describe("allocation", () => {
     // A valid lab group, so only the activity name can make this fail.
     ["an unknown activity", "COMP9999-ComA", "01"],
   ])("rejects %s and keeps the recorded allocation", async (_label, activity, group) => {
-    await setAllocation(LAB, "02");
-    const res = await record(activity, group);
+    const res = await post(new URLSearchParams({ activity, group }));
     expect(res.status, `status ${res.status}`).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
-    expect(allocatedOf(await page(), LAB)).toEqual([`${LAB}-02`]);
+    expect(allocatedOf(await page(), LAB)).toEqual([`${LAB}-04`]);
   });
 
   it("rejects a body that is not a form", async () => {
@@ -228,7 +154,7 @@ describe("allocation", () => {
   // Lab 01 (Thu 11:00–13:00) overlaps the COMP4020 lecture every Thursday, but
   // Peter wants a clash shown only in the week it happens.
   it("does not flag a clashing allocated group in the list", async () => {
-    await setAllocation(LAB, "01");
+    await record(LAB, "01");
     const doc = await page();
     expect(allocatedOf(doc, LAB)).toEqual([`${LAB}-01`]);
     expect(doc.querySelectorAll("[data-activity] [data-clash]")).toHaveLength(0);
