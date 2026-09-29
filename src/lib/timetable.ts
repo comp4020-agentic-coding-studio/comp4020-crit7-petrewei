@@ -9,7 +9,7 @@ import {
   weekdayOf,
 } from "./clash";
 import { db } from "./db";
-import { activities, courses, groups, meetings, preferences } from "./schema";
+import { activities, allocations, courses, groups, meetings } from "./schema";
 
 type MeetingView = typeof meetings.$inferSelect;
 
@@ -31,22 +31,14 @@ type ActivityView = {
   groups: GroupView[];
 };
 
-// What the calendar shows: a lecture, or the group allocated for a ranked
-// activity.
-type CalendarItem = { id: string; label: string; ranked: boolean; meetings: MeetingView[] };
-
-// Activities with more than one group are ranked. The commitments are every
-// lecture plus each ranked activity's first choice; the calendar is every
-// lecture plus the group allocated for each ranked activity.
-type Timetable = {
-  ranked: ActivityView[];
-  commitments: Commitment<MeetingView>[];
-  calendar: CalendarItem[];
-};
+// Labs and tutorials have more than one group to choose from. The
+// commitments are every lecture plus the allocated group of each lab and
+// tutorial: the recorded one, else the allocation copied from MyTimetable.
+type Timetable = { choosable: ActivityView[]; commitments: Commitment<MeetingView>[] };
 
 export function loadTimetable(): Timetable {
   const titles = new Map(db.select().from(courses).all().map((c) => [c.code, c.title]));
-  const ranks = new Map(db.select().from(preferences).all().map((p) => [p.groupId, p.rank]));
+  const recorded = new Map(db.select().from(allocations).all().map((a) => [a.activityId, a.groupLabel]));
   const meetingRows = db.select().from(meetings).all();
   const groupRows = db.select().from(groups).all();
 
@@ -54,69 +46,50 @@ export function loadTimetable(): Timetable {
     .select()
     .from(activities)
     .all()
-    .map((activity) => ({
-      id: activity.id,
-      courseCode: activity.courseCode,
-      courseTitle: titles.get(activity.courseCode) ?? "",
-      code: activity.code,
-      kind: activity.kind,
-      groups: groupRows
-        .filter((g) => g.activityId === activity.id)
-        .map((g) => ({
-          id: g.id,
-          label: g.label,
-          free: g.free,
-          allocated: g.label === activity.allocatedGroup,
-          meetings: meetingRows.filter((m) => m.groupId === g.id),
-          clashes: [],
-        }))
-        // Unranked groups keep MyTimetable's order, after any ranked ones.
-        .sort(
-          (a, b) =>
-            (ranks.get(a.id) ?? Infinity) - (ranks.get(b.id) ?? Infinity) ||
-            a.label.localeCompare(b.label),
-        ),
-    }));
+    .map((activity) => {
+      const allocated = recorded.get(activity.id) ?? activity.allocatedGroup;
+      return {
+        id: activity.id,
+        courseCode: activity.courseCode,
+        courseTitle: titles.get(activity.courseCode) ?? "",
+        code: activity.code,
+        kind: activity.kind,
+        groups: groupRows
+          .filter((g) => g.activityId === activity.id)
+          .map((g) => ({
+            id: g.id,
+            label: g.label,
+            free: g.free,
+            allocated: g.label === allocated,
+            meetings: meetingRows.filter((m) => m.groupId === g.id),
+            clashes: [],
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      };
+    });
 
-  const ranked = views.filter((a) => a.groups.length > 1);
-  const commitments = [
-    ...views.filter((a) => a.groups.length === 1).map((a) => commitment(a, a.groups[0], false)),
-    ...ranked.map((a) => commitment(a, a.groups[0], true)),
-  ];
+  const commitments = views.flatMap((activity) =>
+    activity.groups.filter((g) => g.allocated).map((g) => commitment(activity, g)),
+  );
   const clashes = clashesFor(commitments);
-  for (const activity of ranked) {
-    activity.groups[0].clashes = clashes.get(activity.groups[0].id) ?? [];
+  for (const group of views.flatMap((a) => a.groups)) {
+    group.clashes = clashes.get(group.id) ?? [];
   }
 
-  const calendar = views.flatMap((activity) =>
-    activity.groups
-      .filter((g) => g.allocated)
-      .map((g) => ({
-        id: g.id,
-        label: label(activity, g, activity.groups.length > 1),
-        ranked: activity.groups.length > 1,
-        meetings: g.meetings,
-      })),
-  );
-
-  return { ranked, commitments, calendar };
+  return { choosable: views.filter((a) => a.groups.length > 1), commitments };
 }
 
-const label = (activity: ActivityView, group: GroupView, ranked: boolean): string =>
-  ranked
-    ? `${activity.courseCode} ${activity.kind} group ${group.label}`
-    : `${activity.courseCode} ${activity.kind} (${activity.code})`;
-
-const commitment = (
-  activity: ActivityView,
-  group: GroupView,
-  firstChoice: boolean,
-): Commitment<MeetingView> => ({
-  id: group.id,
-  label: label(activity, group, firstChoice),
-  firstChoice,
-  meetings: group.meetings,
-});
+const commitment = (activity: ActivityView, group: GroupView): Commitment<MeetingView> => {
+  const choosable = activity.groups.length > 1;
+  return {
+    id: group.id,
+    label: choosable
+      ? `${activity.courseCode} ${activity.kind} group ${group.label}`
+      : `${activity.courseCode} ${activity.kind} (${activity.code})`,
+    choosable,
+    meetings: group.meetings,
+  };
+};
 
 // "Thu 11:00–13:00, 30/7 only" for a one-off meeting, else with its weeks.
 export function meetingText(meeting: { day: string; start: string; end: string; weeks: string }): string {
@@ -145,7 +118,7 @@ function todayInCanberra(): number {
 // meeting and the last week holds the last meeting. `requested` is the ?week
 // parameter; anything but a week in range shows the week holding today,
 // or the nearest end of the semester.
-export function weekView(calendar: CalendarItem[], requested: string | null) {
+export function weekView(calendar: Commitment<MeetingView>[], requested: string | null) {
   const dates = calendar.flatMap((item) => item.meetings.flatMap((m) => [...parseWeeks(m.weeks)]));
   const firstMonday = Math.min(...dates) - weekdayOf(Math.min(...dates));
   const weekOf = (day: number) => Math.floor((day - firstMonday) / 7) + 1;
@@ -163,7 +136,7 @@ export function weekView(calendar: CalendarItem[], requested: string | null) {
     const entries = calendar
       .flatMap((item) =>
         item.meetings
-          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, title: item.label, ranked: item.ranked, meeting }))
+          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, title: item.label, choosable: item.choosable, meeting }))
           .filter(({ meeting }) => meeting.day === day && parseWeeks(meeting.weeks).has(date)),
       )
       .sort((a, b) => a.meeting.start.localeCompare(b.meeting.start));

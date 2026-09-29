@@ -56,26 +56,26 @@ describe("meetingsClash", () => {
 
 describe("clashesFor", () => {
   const commitments: Commitment[] = [
-    { id: "COMP3300-ComA-01", label: "COMP3300 Computer lab 01", firstChoice: true, meetings: [lab01] },
-    { id: "COMP4020-LecA-01", label: "COMP4020 Lecture A", firstChoice: false, meetings: [comp4020Lecture] },
-    { id: "COMP3500-LecA-01", label: "COMP3500 Lecture A", firstChoice: false, meetings: [comp3500Lecture] },
+    { id: "COMP3300-ComA-01", label: "COMP3300 Computer lab 01", choosable: true, meetings: [lab01] },
+    { id: "COMP4020-LecA-01", label: "COMP4020 Lecture A", choosable: false, meetings: [comp4020Lecture] },
+    { id: "COMP3500-LecA-01", label: "COMP3500 Lecture A", choosable: false, meetings: [comp3500Lecture] },
     {
       id: "COMP4020-TutA-01",
       label: "COMP4020 Tutorial 01",
-      firstChoice: true,
+      choosable: true,
       meetings: [tut01, tut01Makeup],
     },
   ];
   const clashes = clashesFor(commitments);
 
-  it("lists every commitment a first choice clashes with, and never itself", () => {
+  it("lists every commitment an allocated group clashes with, and never itself", () => {
     expect(clashes.get("COMP3300-ComA-01")?.map((c) => c.id).sort()).toEqual([
       "COMP3500-LecA-01",
       "COMP4020-LecA-01",
     ]);
   });
 
-  it("gives a first choice that fits no clashes", () => {
+  it("gives an allocated group that fits no clashes", () => {
     expect(clashes.get("COMP4020-TutA-01") ?? []).toEqual([]);
   });
 });

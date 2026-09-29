@@ -1,12 +1,12 @@
 import { JSDOM } from "jsdom";
-import { describe, expect, inject, it } from "vitest";
+import { beforeEach, describe, expect, inject, it } from "vitest";
 
 // Contract for "Your week", checked over HTTP against the built app:
 // - GET /?week=N shows one Mon–Fri week as [data-week="N"]. Week 1 starts on
 //   Monday 27/7 and the last week holds the last meeting date (29/10), so
 //   there are 14. Each weekday is [data-date="D/M"] with its [data-slot]s.
-// - The week holds every lecture and the allocated group of each ranked
-//   activity, only on the dates they meet. The ranking does not change it.
+// - The week holds every lecture and the allocated group of each lab and
+//   tutorial, only on the dates they meet, and follows a recorded allocation.
 // - A slot that overlaps another slot on the same date has class slot-clash.
 // - Links with rel="prev" and rel="next" go to the neighbouring weeks, and
 //   are absent at either end.
@@ -15,15 +15,24 @@ import { describe, expect, inject, it } from "vitest";
 const baseUrl = inject("baseUrl");
 
 const LAB = "COMP3300-ComA";
+const TUT = "COMP4020-TutA";
 const LAST_WEEK = 14;
 
-const rank = (activity: string, order: string[]) =>
-  fetch(new URL("/api/preferences", baseUrl), {
+const record = async (activity: string, group: string) => {
+  const res = await fetch(new URL("/api/allocation", baseUrl), {
     method: "POST",
     headers: { origin: baseUrl },
-    body: new URLSearchParams({ activity, order: order.join(",") }),
+    body: new URLSearchParams({ activity, group }),
     redirect: "manual",
   });
+  expect(res.status, `recording ${activity} ${group}`).toBe(303);
+};
+
+// MyTimetable's allocation: lab 04 and tutorial 03.
+beforeEach(async () => {
+  await record(LAB, "04");
+  await record(TUT, "03");
+});
 
 const weekPage = async (query = ""): Promise<Document> => {
   const res = await fetch(new URL(`/${query}`, baseUrl));
@@ -59,13 +68,18 @@ describe("your week", () => {
     expect(dates).toEqual(["28/9", "29/9", "30/9", "1/10", "2/10"]);
   });
 
-  // Lab 01 is ranked first here, but group 04 is the one allocated.
-  it("shows the allocated lab and tutorial, whatever the ranking", async () => {
-    expect((await rank(LAB, ["01", "02", "03", "04"])).status).toBe(303);
+  it("shows the allocated lab and tutorial, and no other group", async () => {
     const doc = await weekPage("?week=2");
     expect(slotText(doc, "7/8").join()).toMatch(/15:00–17:00.*COMP3300 Computer lab group 04/);
     expect(slotText(doc, "5/8").join()).toMatch(/09:00–10:30.*COMP4020 Tutorial group 03/);
-    expect(allSlotText(doc)).not.toContain("group 01");
+    expect(allSlotText(doc)).not.toMatch(/group 0[1256]/);
+  });
+
+  it("follows a recorded allocation", async () => {
+    await record(LAB, "01");
+    const doc = await weekPage("?week=2");
+    expect(slotText(doc, "6/8").join()).toMatch(/11:00–13:00.*COMP3300 Computer lab group 01/);
+    expect(allSlotText(doc)).not.toContain("group 04");
   });
 
   // The COMP3500 lecture meets on 30/7 only, and the tutorials start on 5/8.

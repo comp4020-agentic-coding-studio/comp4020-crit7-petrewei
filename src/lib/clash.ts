@@ -8,7 +8,8 @@ export type Meeting = {
 export type Commitment<M extends Meeting = Meeting> = {
   id: string;
   label: string;
-  firstChoice: boolean;
+  // A lab or tutorial, where the student has a group to choose; a lecture has one.
+  choosable: boolean;
   meetings: M[];
 };
 
@@ -54,10 +55,10 @@ export function meetingsClash(a: Meeting, b: Meeting): boolean {
   return [...parseWeeks(a.weeks)].some((day) => bDays.has(day));
 }
 
-// For each first choice, every other commitment it clashes with.
+// For each lab or tutorial group, every other commitment it clashes with.
 export function clashesFor<C extends Commitment>(commitments: C[]): Map<string, C[]> {
   const clashes = new Map<string, C[]>();
-  for (const choice of commitments.filter((c) => c.firstChoice)) {
+  for (const choice of commitments.filter((c) => c.choosable)) {
     clashes.set(
       choice.id,
       commitments.filter(

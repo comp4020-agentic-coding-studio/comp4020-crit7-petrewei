@@ -35,23 +35,24 @@ h2 {
   color: #555;
 }
 
-.ranking {
-  padding-inline-start: 1.5rem;
+.groups {
+  padding: 0;
+  list-style: none;
 }
 
-.ranking > li {
+.groups > li {
   margin-block: 0.75rem;
   padding: 0.6rem 0.8rem;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
-.ranking > li:first-child {
+.groups > li[data-allocated] {
   border-width: 2px;
   border-color: #1a1a1a;
 }
 
-.ranking > li[data-clash] {
+.groups > li[data-clash] {
   border-color: #b00020;
   background: #fff4f5;
 }
@@ -137,7 +138,7 @@ button {
   overflow-wrap: anywhere;
 }
 
-.day li.allocated {
+.day li.choosable {
   border-left-color: #0b5fff;
 }
 

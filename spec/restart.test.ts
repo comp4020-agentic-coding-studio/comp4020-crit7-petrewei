@@ -10,8 +10,8 @@ import { afterEach, expect, it } from "vitest";
 // Fly keeps the database on a volume, so every restart and deploy boots the
 // app against data that is already there. The shared test server always gets a
 // fresh database, so this boots the built server twice on one database file and
-// checks that the second boot keeps a saved ranking and neither duplicates nor
-// loses the seeded groups.
+// checks that the second boot keeps a recorded allocation and neither
+// duplicates nor loses the seeded groups.
 let server: ChildProcess | undefined;
 
 const stop = async () => {
@@ -53,22 +53,27 @@ const boot = async (databasePath: string): Promise<string> => {
 
 const groupsOnPage = async (baseUrl: string): Promise<string[]> => {
   const doc = new JSDOM(await (await fetch(baseUrl)).text()).window.document;
-  return [...doc.querySelectorAll("[data-group]")].map((el) => el.getAttribute("data-group") ?? "");
+  return [...doc.querySelectorAll("[data-group]")].map(
+    (el) => `${el.getAttribute("data-group")}${el.hasAttribute("data-allocated") ? " allocated" : ""}`,
+  );
 };
 
-it("keeps the seeded groups and a saved ranking across a restart", async () => {
+it("keeps the seeded groups and a recorded allocation across a restart", async () => {
   const databasePath = join(mkdtempSync(join(tmpdir(), "restart-db-")), "app.db");
 
   const baseUrl = await boot(databasePath);
-  const saved = await fetch(new URL("/api/preferences", baseUrl), {
+  // A fresh database shows the allocation copied from MyTimetable.
+  expect(await groupsOnPage(baseUrl)).toContain("COMP3300-ComA-04 allocated");
+  const saved = await fetch(new URL("/api/allocation", baseUrl), {
     method: "POST",
     headers: { origin: baseUrl },
-    body: new URLSearchParams({ activity: "COMP3300-ComA", order: "02,04,03,01" }),
+    body: new URLSearchParams({ activity: "COMP3300-ComA", group: "02" }),
     redirect: "manual",
   });
   expect(saved.status).toBe(303);
   const first = await groupsOnPage(baseUrl);
-  expect(first.length, "the first boot shows no [data-group] elements").toBeGreaterThan(0);
+  expect(first).toContain("COMP3300-ComA-02 allocated");
+  expect(first).toContain("COMP3300-ComA-04");
   await stop();
 
   const second = await groupsOnPage(await boot(databasePath));

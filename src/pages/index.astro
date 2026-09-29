@@ -2,15 +2,8 @@
 import { loadTimetable, meetingText, weekView } from "../lib/timetable";
 import "../styles.css";
 
-const { ranked, calendar } = loadTimetable();
-const week = weekView(calendar, Astro.url.searchParams.get("week"));
-
-// The ranking that pressing "Move up" on position i produces.
-const moveUp = (labels: string[], i: number): string => {
-  const next = [...labels];
-  [next[i - 1], next[i]] = [next[i], next[i - 1]];
-  return next.join(",");
-};
+const { choosable, commitments } = loadTimetable();
+const week = weekView(commitments, Astro.url.searchParams.get("week"));
 
 const freeText = (free: number | null): string =>
   free === null ? "" : free === 0 ? "full" : `${free} ${free === 1 ? "place" : "places"} free`;
@@ -26,31 +19,34 @@ const freeText = (free: number | null): string =>
   </head>
   <body>
     <nav aria-label="site">
-      <a href="/">Preferences</a>
+      <a href="/">Timetable</a>
       <a href="/readme/">About</a>
     </nav>
     <main>
       <h1>ANU Timetable</h1>
       <p>
-        Second Semester 2026. Rank the groups for each activity: the top one is your first choice. A
-        first choice that overlaps a lecture or another first choice is flagged with what it clashes
-        with. Sessions and free places were copied from MyTimetable on 29 September 2026.
+        Second Semester 2026. Each lab and tutorial lists its groups, with the one you are allocated
+        marked. If your allocation changes, record the new group here. An allocated group that overlaps
+        a lecture or another allocated group is flagged with what it clashes with. Sessions, free places
+        and allocations were copied from MyTimetable on 29 September 2026.
       </p>
 
       {
-        ranked.map((activity) => {
-          const labels = activity.groups.map((group) => group.label);
-          return (
+        choosable.map((activity) => (
             <section data-activity={activity.id} aria-labelledby={`heading-${activity.id}`}>
               <h2 id={`heading-${activity.id}`}>
                 {activity.courseCode} {activity.kind}
               </h2>
               <p class="course">{activity.courseTitle}</p>
-              <form method="post" action="/api/preferences">
+              <form method="post" action="/api/allocation">
                 <input type="hidden" name="activity" value={activity.id} />
-                <ol class="ranking">
-                  {activity.groups.map((group, i) => (
-                    <li data-group={group.id} data-clash={group.clashes.length > 0 ? "" : undefined}>
+                <ul class="groups">
+                  {activity.groups.map((group) => (
+                    <li
+                      data-group={group.id}
+                      data-allocated={group.allocated ? "" : undefined}
+                      data-clash={group.clashes.length > 0 ? "" : undefined}
+                    >
                       <div class="group-head">
                         <span class="group-name">Group {group.label}</span>
                         {group.allocated && <span class="tag">allocated</span>}
@@ -71,18 +67,17 @@ const freeText = (free: number | null): string =>
                             .join("; ")}
                         </p>
                       )}
-                      {i > 0 && (
-                        <button name="order" value={moveUp(labels, i)} aria-label={`Move up group ${group.label}`}>
-                          Move up
+                      {!group.allocated && (
+                        <button name="group" value={group.label} aria-label={`Group ${group.label} is my group`}>
+                          This is my group
                         </button>
                       )}
                     </li>
                   ))}
-                </ol>
+                </ul>
               </form>
             </section>
-          );
-        })
+        ))
       }
 
       <section class="week-section" aria-labelledby="heading-week" data-week={week.number}>
@@ -108,7 +103,7 @@ const freeText = (free: number | null): string =>
                 <ul>
                   {entries.length === 0 && <li class="slot-empty">Nothing on</li>}
                   {entries.map((entry) => (
-                    <li data-slot={entry.key} class:list={{ allocated: entry.ranked, "slot-clash": entry.clash }}>
+                    <li data-slot={entry.key} class:list={{ choosable: entry.choosable, "slot-clash": entry.clash }}>
                       <span class="slot-time">
                         {entry.meeting.start}–{entry.meeting.end}
                       </span>

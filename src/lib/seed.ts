@@ -6,7 +6,7 @@ import timetable from "../data/timetable-2026-s2.json";
 import { activities, activityId, courses, groupId, groups, meetings } from "./schema";
 
 // Upserts by primary key so a corrected JSON value replaces the old one, and
-// replaces each group's meetings wholesale. Preferences are never touched.
+// replaces each group's meetings wholesale. Recorded allocations are never touched.
 export function seed(db: BetterSQLite3Database): void {
   db.transaction((tx) => {
     for (const course of timetable.courses) {

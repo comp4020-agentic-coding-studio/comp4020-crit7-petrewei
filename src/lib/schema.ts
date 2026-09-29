@@ -48,10 +48,11 @@ export const meetings = sqliteTable("meetings", {
   weeks: text().notNull(),
 });
 
-// The only state a visitor changes: each group's rank within its activity.
-export const preferences = sqliteTable("preferences", {
-  groupId: text("group_id")
+// The only state a visitor changes: the group recorded as allocated for a lab
+// or tutorial. Without a row, the allocation copied from MyTimetable stands.
+export const allocations = sqliteTable("allocations", {
+  activityId: text("activity_id")
     .primaryKey()
-    .references(() => groups.id),
-  rank: int().notNull(),
+    .references(() => activities.id),
+  groupLabel: text("group_label").notNull(),
 });
