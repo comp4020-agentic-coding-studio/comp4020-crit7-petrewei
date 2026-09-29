@@ -10,6 +10,12 @@ pattern='sk-[A-Za-z0-9_-]{20,}'
 # that also match the shape.
 hits=$(git grep --cached -noE "$pattern" | grep -E ':[A-Za-z0-9_-]*[A-Z][A-Za-z0-9_-]*$' | cut -d: -f1,2)
 
+# A Fly.io token (the one in mise.local.toml) is a base64 macaroon after an
+# fm1_ or fm2_ prefix, so it needs its own pattern: it contains + / = and
+# the filter above would drop it.
+fly=$(git grep --cached -nE 'fm[12]_[A-Za-z0-9+/=]{20,}' | cut -d: -f1,2)
+hits=$(printf '%s\n%s\n' "$hits" "$fly" | sed '/^$/d')
+
 if [ -n "$hits" ]; then
 	echo "commit blocked: something staged looks like an API key" >&2
 	echo "$hits" | sed 's/^/  /' >&2

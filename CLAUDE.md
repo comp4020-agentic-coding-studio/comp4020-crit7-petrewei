@@ -72,7 +72,7 @@ Where each spec line is held:
 
 ## 7 Git and CI
 
-The pre-commit hook blocks staged `sk-` keys, such as the course proxy key; CI's scan only sees a key once it has already been pushed. The hook does not recognise the Fly token (`FlyV1 fm2_…`), so that token is kept out only by `mise.local.toml` staying gitignored and by staging files by name.
+The pre-commit hook blocks staged `sk-` keys, such as the course proxy key, and Fly tokens (`fm1_`/`fm2_`), such as the one in gitignored `mise.local.toml`. It is the sensor that matters for secrets, because CI's scan only sees a key once it has already been pushed.
 
 CI skips every job while the repo is private, so until shipping `pnpm check`, `pnpm check:evidence` and a hand deploy are the only gates. Shipping makes the whole repo public, not just the app. Source, commit history, CI logs and this file are all readable, so write every commit message and every rule here for someone outside the course.
 
