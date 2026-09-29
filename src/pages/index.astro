@@ -11,6 +11,13 @@ const freeText = (free: number | null): string =>
   free === null ? "" : free === 0 ? "Full" : `${free} ${free === 1 ? "place" : "places"} free`;
 
 const datesText = (weeks: string): string => (isOneOff(weeks) ? `${weeks} only` : weeks.replaceAll("-", "–"));
+
+// A card shows a group's regular times. A one-off replacement, such as a
+// tutorial moved for a public holiday, is listed only in the details.
+const regular = <M extends { weeks: string }>(meetings: M[]): M[] => {
+  const recurring = meetings.filter((m) => !isOneOff(m.weeks));
+  return recurring.length > 0 ? recurring : meetings;
+};
 ---
 
 <!doctype html>
@@ -37,6 +44,7 @@ const datesText = (weeks: string): string => (isOneOff(weeks) ? `${weeks} only` 
               <p class="course">{activity.courseTitle}</p>
               <form method="post" action="/api/allocation">
                 <input type="hidden" name="activity" value={activity.id} />
+                <input type="hidden" name="week" value={week.number} />
                 <ul class="groups">
                   {activity.groups.map((group) => (
                     <li
@@ -48,7 +56,7 @@ const datesText = (weeks: string): string => (isOneOff(weeks) ? `${weeks} only` 
                         <span class="group-name">Group {group.label}</span>
                         {group.allocated && <span class="tag">Allocated</span>}
                       </div>
-                      {group.meetings.map((meeting) => (
+                      {regular(group.meetings).map((meeting) => (
                         <p class="when">
                           {meeting.day} {meeting.start}–{meeting.end}
                         </p>
@@ -59,7 +67,11 @@ const datesText = (weeks: string): string => (isOneOff(weeks) ? `${weeks} only` 
                         <ul class="meetings">
                           {group.meetings.map((meeting) => (
                             <li>
-                              <span>{datesText(meeting.weeks)}</span>
+                              <span>
+                                {!regular(group.meetings).includes(meeting) &&
+                                  `${meeting.day} ${meeting.start}–${meeting.end}, `}
+                                {datesText(meeting.weeks)}
+                              </span>
                               <span>{meeting.location}</span>
                             </li>
                           ))}

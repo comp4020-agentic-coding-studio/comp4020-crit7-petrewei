@@ -7,9 +7,13 @@ import { afterAll, describe, expect, inject, it } from "vitest";
 //   allocated group, and only that one, carries data-allocated.
 // - POST /api/allocation with activity=COURSE-ACT and group=NN records the
 //   allocation and redirects back to / with 303.
-// - The page's own form for an activity submits exactly those two fields, so the
-//   form and the handler cannot drift apart while direct POSTs stay green. It
-//   works without JavaScript: a button named `group` carries the group.
+// - The page's own form for an activity submits those two fields, so the form
+//   and the handler cannot drift apart while direct POSTs stay green. It works
+//   without JavaScript: a button named `group` carries the group. The form also
+//   carries the week shown, and the 303 goes back to /?week=N, so the week
+//   being viewed shows the new allocation.
+// - A card shows a group's regular meeting times. A one-off replacement, such
+//   as a tutorial moved for a public holiday, is listed only in its details.
 // - The server rejects an unknown activity, a lecture, or a group the activity
 //   does not have with a 4xx, and the recorded allocation is unchanged.
 // - Clashes are shown only in the week calendar, on the date they happen
@@ -123,6 +127,38 @@ describe("allocation", () => {
     });
     expect(res.status).toBe(303);
     expect(allocatedOf(await page(), LAB)).toEqual([`${LAB}-03`]);
+  });
+
+  it("returns to the week being viewed, showing the new allocation", async () => {
+    await setAllocation(TUT, "03");
+    const res0 = await fetch(new URL("/?week=3", baseUrl));
+    const doc = new JSDOM(await res0.text()).window.document;
+    const form = formFor(doc, TUT);
+    const submitter = [...form.querySelectorAll("button")].find((b) => b.name === "group" && b.value === "01");
+    if (!submitter) throw new Error("no button named `group` with the value 01");
+
+    const res = await fetch(new URL("/api/allocation", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      body: formData(form, submitter),
+      redirect: "manual",
+    });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe("/?week=3");
+
+    const after = await fetch(new URL(res.headers.get("location")!, baseUrl));
+    const week = new JSDOM(await after.text()).window.document;
+    expect(week.querySelector("[data-week]")?.getAttribute("data-week")).toBe("3");
+    const monday = week.querySelector('[data-week] [data-date="10/8"]')?.textContent ?? "";
+    expect(monday.replace(/\s+/g, " ")).toMatch(/14:00–15:30.*COMP4020 Tutorial group 01/);
+  });
+
+  // Tutorial 01 meets on Mondays, and on Tue 6/10 in week 9 for Labour Day.
+  it("shows only a group's regular times on its card", async () => {
+    const card = groupItem(await page(), `${TUT}-01`);
+    const times = [...card.querySelectorAll(":scope > .when")].map((el) => el.textContent?.trim());
+    expect(times).toEqual(["Mon 14:00–15:30"]);
+    expect(card.querySelector("details")?.textContent).toMatch(/Tue 14:00–15:30.*6\/10 only/s);
   });
 
   it.each([
