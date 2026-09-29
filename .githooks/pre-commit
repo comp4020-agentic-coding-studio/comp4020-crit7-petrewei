@@ -16,6 +16,18 @@ hits=$(git grep --cached -noE "$pattern" | grep -E ':[A-Za-z0-9_-]*[A-Z][A-Za-z0
 fly=$(git grep --cached -nE 'fm[12]_[A-Za-z0-9+/=]{20,}' | cut -d: -f1,2)
 hits=$(printf '%s\n%s\n' "$hits" "$fly" | sed '/^$/d')
 
+# Personal data that must not reach a repo going public: a MyTimetable
+# calendar feed URL (its UUID grants read access to a timetable) and an ANU
+# uni ID. The patterns are generic so no real ID has to appear in this file.
+personal=$(git grep --cached -nE 'calendar/ical/[0-9a-f]{8}-[0-9a-f]{4}-|(^|[^A-Za-z0-9])u[0-9]{7}([^0-9]|$)' | cut -d: -f1,2)
+if [ -n "$personal" ]; then
+	echo "commit blocked: something staged looks like a timetable feed URL or a uni ID" >&2
+	echo "$personal" | sed 's/^/  /' >&2
+	echo "" >&2
+	echo "Remove it, re-stage, and commit again. The repo goes public at the cutoff." >&2
+	exit 1
+fi
+
 if [ -n "$hits" ]; then
 	echo "commit blocked: something staged looks like an API key" >&2
 	echo "$hits" | sed 's/^/  /' >&2

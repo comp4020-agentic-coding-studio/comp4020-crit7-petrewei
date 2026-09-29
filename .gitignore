@@ -20,7 +20,10 @@ Desktop.ini
 mise.local.toml
 *.pem
 
-# Claude Code's project directory is machine-local: settings in here can hold
-# your course API key, and this repo goes public when you ship. Your tracked
-# harness is CLAUDE.md (and any AGENTS.md), not this directory.
-.claude/
+# Claude Code's project directory is machine-local apart from the shared
+# harness: settings.json (permission rules and hooks) and hooks/. The course
+# API key lives in settings.local.json, which stays ignored with everything
+# else here, and the pre-commit hook blocks sk- keys as a second guard.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
