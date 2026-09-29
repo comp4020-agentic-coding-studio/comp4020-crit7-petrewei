@@ -1,4 +1,4 @@
-import { type Commitment, clashesFor } from "./clash";
+import { type Commitment, clashesFor, meetingsClash } from "./clash";
 import { db } from "./db";
 import { activities, courses, groups, meetings, preferences } from "./schema";
 
@@ -89,4 +89,39 @@ export function meetingText(meeting: { day: string; start: string; end: string; 
   const oneOff = !/[-,]/.test(meeting.weeks);
   const weeks = oneOff ? `${meeting.weeks} only` : `weeks ${meeting.weeks}`;
   return `${meeting.day} ${meeting.start}–${meeting.end}, ${weeks}`;
+}
+
+export type WeekEntry = {
+  key: string;
+  title: string;
+  firstChoice: boolean;
+  meeting: MeetingView;
+  clash: boolean;
+};
+
+export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+// Every lecture and first-choice meeting, by weekday and start time. An entry
+// is marked when it clashes with a meeting of another commitment.
+export function weekByDay({ ranked, fixed }: Timetable): Map<string, WeekEntry[]> {
+  const commitments = [
+    ...fixed.map((a) => commitment(a, a.groups[0], false)),
+    ...ranked.map((a) => commitment(a, a.groups[0], true)),
+  ];
+  const entries = commitments.flatMap((c) =>
+    c.meetings.map((meeting, i) => ({
+      key: `${c.id}-${i}`,
+      owner: c.id,
+      title: c.label,
+      firstChoice: c.firstChoice,
+      meeting: meeting as MeetingView,
+    })),
+  );
+  const byDay = new Map<string, WeekEntry[]>(WEEKDAYS.map((day) => [day, []]));
+  for (const entry of entries) {
+    const clash = entries.some((other) => other.owner !== entry.owner && meetingsClash(entry.meeting, other.meeting));
+    byDay.get(entry.meeting.day)?.push({ ...entry, clash });
+  }
+  for (const list of byDay.values()) list.sort((a, b) => a.meeting.start.localeCompare(b.meeting.start));
+  return byDay;
 }

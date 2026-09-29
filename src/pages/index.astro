@@ -1,8 +1,10 @@
 ---
-import { loadTimetable, meetingText } from "../lib/timetable";
+import { loadTimetable, meetingText, WEEKDAYS, weekByDay } from "../lib/timetable";
 import "../styles.css";
 
-const { ranked } = loadTimetable();
+const timetable = loadTimetable();
+const { ranked } = timetable;
+const week = weekByDay(timetable);
 
 // The ranking that pressing "Move up" on position i produces.
 const moveUp = (labels: string[], i: number): string => {
@@ -21,6 +23,7 @@ const freeText = (free: number | null): string =>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tutorial and lab preferences</title>
+    <link rel="icon" href="data:," />
   </head>
   <body>
     <nav aria-label="site">
@@ -82,6 +85,34 @@ const freeText = (free: number | null): string =>
           );
         })
       }
+
+      <section class="week-section" aria-labelledby="heading-week">
+        <h2 id="heading-week">Your week</h2>
+        <p class="course">Lectures and your first choices. A meeting marked "clash" overlaps another on at least one date.</p>
+        <div class="week">
+          {
+            WEEKDAYS.map((day) => (
+              <div class="day">
+                <h3>{day}</h3>
+                <ul>
+                  {(week.get(day) ?? []).length === 0 && <li class="slot-empty">Nothing on</li>}
+                  {(week.get(day) ?? []).map((entry) => (
+                    <li data-slot={entry.key} class:list={{ "first-choice": entry.firstChoice, "slot-clash": entry.clash }}>
+                      <span class="slot-time">
+                        {entry.meeting.start}–{entry.meeting.end}
+                      </span>
+                      <span class="slot-title">{entry.title}</span>
+                      <span class="slot-where">{entry.meeting.location}</span>
+                      {!/[-,]/.test(entry.meeting.weeks) && <span class="slot-note">{entry.meeting.weeks} only</span>}
+                      {entry.clash && <span class="slot-note slot-clash-note">clash</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </section>
     </main>
   </body>
 </html>

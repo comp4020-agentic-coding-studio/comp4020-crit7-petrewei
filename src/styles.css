@@ -9,12 +9,12 @@ body {
 nav {
   display: flex;
   gap: 1rem;
-  max-width: 48rem;
+  max-width: 64rem;
   margin: 0 auto 1rem;
 }
 
 main {
-  max-width: 48rem;
+  max-width: 64rem;
   margin: 0 auto;
 }
 
@@ -94,4 +94,69 @@ h2 {
 button {
   padding: 0.3rem 0.9rem;
   font: inherit;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.day h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+}
+
+.day ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day li {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccc;
+  border-left: 4px solid #777;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.day li.first-choice {
+  border-left-color: #0b5fff;
+}
+
+.day li.slot-clash {
+  border-color: #b00020;
+  border-left-color: #b00020;
+  background: #fff4f5;
+}
+
+.day li.slot-empty {
+  border-left-color: #ccc;
+  color: #555;
+}
+
+.slot-time,
+.slot-title {
+  font-weight: 600;
+}
+
+.slot-where,
+.slot-note {
+  color: #555;
+}
+
+.slot-clash-note {
+  color: #b00020;
+  font-weight: 600;
+}
+
+@media (max-width: 40rem) {
+  .week {
+    grid-template-columns: 1fr;
+  }
 }
