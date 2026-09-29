@@ -61,6 +61,7 @@ Where each spec line is held:
 
 This crit's written account is `PROCESS.md` plus the reflection in `reflections/crit-7.md`, which `pnpm check:evidence` requires.
 
+- **Grow both documents with the project.** After each change I direct, update `PROCESS.md` and the reflection in the same session, citing its commit, and keep every present-tense claim true of the current app.
 - **A paragraph or two, one narrative.** A first-person account of getting from the brief to the harness and the workflow, as against a run of fixes with a commit hash apiece.
 - **Write each moment in STAR form, weighted.** Situation 20% (the specific difficulty, not the general situation), Task 10% (what I set out to achieve), Action 60% (what I did, why, and the alternatives I rejected), Result 10% (the outcome and what I learned). An even split recounts events; the weighting is what makes a capability visible.
 - **Cite the discarded work too.** A deletion, a reverted commit, a rule added and then cut: judgement shows there, and successes alone read as a clean run that never happened.
