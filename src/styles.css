@@ -1,10 +1,14 @@
 :root {
   --ink: #1a1a1a;
-  --muted: #555;
-  --line: #d4d4d8;
+  --muted: #5b6070;
+  --line: #e2e4ea;
   --accent: #0b5fff;
+  --accent-bg: #eef4ff;
   --clash: #b00020;
   --clash-bg: #fff4f5;
+  --free: #177a3c;
+  --surface: #fafbfc;
+  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
 }
 
 body {
@@ -12,7 +16,7 @@ body {
   font-family: system-ui, sans-serif;
   line-height: 1.5;
   color: var(--ink);
-  background: #f6f6f7;
+  background: #f1f3f7;
 }
 
 a {
@@ -20,6 +24,7 @@ a {
 }
 
 .site-header {
+  border-bottom: 3px solid var(--accent);
   background: var(--ink);
   color: #fff;
 }
@@ -66,7 +71,8 @@ main {
 
 h1 {
   margin: 0 0 0.25rem;
-  font-size: 1.6rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
 }
 
 .lede {
@@ -75,7 +81,7 @@ h1 {
 }
 
 section {
-  margin-block: 0 2rem;
+  margin-block: 0 1.25rem;
 }
 
 h2 {
@@ -91,7 +97,17 @@ h2 {
 .activities {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  gap: 0 2rem;
+  align-items: start;
+  gap: 0 1.25rem;
+}
+
+.activity,
+.week-section {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--shadow);
 }
 
 .groups {
@@ -107,12 +123,13 @@ h2 {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .card[data-allocated] {
   border: 2px solid var(--accent);
   padding: calc(0.6rem - 1px) calc(0.75rem - 1px);
+  background: var(--accent-bg);
 }
 
 .card-head {
@@ -134,12 +151,19 @@ h2 {
 }
 
 .free {
-  color: var(--muted);
+  color: var(--free);
+  font-weight: 600;
 }
 
 .free.full {
+  display: inline-block;
+  margin-top: 0.15rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--clash-bg);
   color: var(--clash);
-  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.6;
 }
 
 details {
@@ -148,7 +172,9 @@ details {
 }
 
 summary {
+  width: fit-content;
   color: var(--accent);
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -195,11 +221,15 @@ button:disabled {
   cursor: default;
 }
 
-.week-section {
-  padding: 1rem;
+main.prose {
+  box-sizing: border-box;
+  width: min(64rem, 100% - 2rem);
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
+  box-shadow: var(--shadow);
 }
 
 .prose h2 {
@@ -218,9 +248,24 @@ button:disabled {
 .week-nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.8rem;
+}
+
+.week-nav a {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.week-nav a:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 .week-range {
@@ -234,8 +279,10 @@ button:disabled {
 }
 
 .day h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1rem;
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
 }
 
 .day ul {
@@ -248,16 +295,18 @@ button:disabled {
   display: flex;
   flex-direction: column;
   margin-bottom: 0.4rem;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #ccc;
-  border-left: 4px solid #777;
-  border-radius: 4px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid #8a8f9c;
+  border-radius: 6px;
+  background: var(--surface);
   font-size: 0.85rem;
   overflow-wrap: anywhere;
 }
 
 .day li.choosable {
   border-left-color: var(--accent);
+  background: var(--accent-bg);
 }
 
 .day li.slot-clash {
@@ -267,8 +316,9 @@ button:disabled {
 }
 
 .day li.slot-empty {
-  border-left-color: #ccc;
-  color: #555;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
 }
 
 .slot-time,
@@ -278,11 +328,17 @@ button:disabled {
 
 .slot-where,
 .slot-note {
-  color: #555;
+  color: var(--muted);
 }
 
 .slot-clash-note {
-  color: var(--clash);
+  align-self: flex-start;
+  margin-top: 0.2rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--clash);
+  color: #fff;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
