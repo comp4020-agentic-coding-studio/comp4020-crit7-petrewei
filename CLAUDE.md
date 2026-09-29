@@ -18,10 +18,8 @@ Where each spec line is held:
 ## 2 Data and Database
 
 - **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** A first choice is compared with every lecture and with the first choice of every other activity.
-- **The database is the only source of truth for rankings.** `localStorage` or server memory would survive a reload in one browser but not a second session or a restart.
-- **Validate every POST on the server.** An unknown activity, or an order that is not exactly that activity's groups, is rejected and changes nothing, because any client can bypass the form's own constraints.
-- **Keep the calendar feed URL, uni ID, email and MyTimetable screenshots out of the repo.** It goes public at the cutoff, and the feed URL gives read access to my timetable.
-- **Seeding must be safe to run against a database that already has data.** The live database persists across restarts and deploys, and a seed that inserts on every boot duplicates every session; the test database is always fresh, so the tests cannot catch this.
+- **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.
+- **Keep `/api/events` when the guestbook goes.** CI's post-deploy job fails without it once the repo is public.
 
 ## 3 Working Practices
 
@@ -33,14 +31,12 @@ Where each spec line is held:
 ## 4 Verification
 
 - **Return the evidence itself.** Drive the page in a real browser and produce the screenshot, console output, response body, DOM state or exit code.
-- **Submit through the real form, not only the endpoint.** A test that POSTs directly stays green when the form's field names drift from the handler's, and every ranking is then silently lost behind a normal 303.
 - **Observe the saved row as well as the response.** A 303 shows the handler ran; `sqlite3 .data/app.db` shows the row exists. The local and production databases are separate and are each verified in their own environment.
 - **Verify the deployed app after every deploy.** Open the `*.fly.dev` URL, save a ranking and reload, and check that it also survives the next deploy. The tests boot the built server against a throwaway database, so a migration or seed that fails on the Fly volume only shows up there.
 - **Spend verification where the flows differ.** Drive the one or two flows that are genuinely distinct and let `pnpm check` cover the rest.
 
 ## 5 Sensors and Checks
 
-- **Add every new page to `spec/routes.ts`.** The invariants and the axe pass only visit the routes listed there, so an unlisted page is silently unchecked.
 - **Write the sensor before a change worth holding to.** When a judgement is worth keeping, encode it as a check first; the contract then outlives the edit and rejects later drift on its own.
 - **Write the assertion so it can only pass for the right reason.** Assert that the thing is used, because a forbid-only check is satisfied by an empty page.
 - **Expect a check to become the target.** The clash tests use one real clash and one session that fits, so a page that flags lab 01 by name would pass them; ask what a check would let through as well as what it would catch.
@@ -67,8 +63,7 @@ This crit's written account is `PROCESS.md` plus the reflection in `reflections/
 
 ## 8 Markdown
 
-- **Follow `markdownlint` except `MD013`, and keep each prose paragraph on a single line.** A hard-wrapped rewrap diffs every line and buries the sentence that changed.
-- **After creating or modifying Markdown files, run `markdownlint-cli2` on them and fix everything it reports.** It reads the repo's `.markdownlint-cli2.yaml`, so no flag is needed.
+- **Keep each prose paragraph on a single line.** A hard-wrapped rewrap diffs every line and buries the sentence that changed.
 - **Number document subheadings, and set them in Title Case.** `## 1 Heading Level 2`, then `### 1.1 Heading Level 3`, so a section can be cited by number; the `# Title` is not numbered. Documents only — `CLAUDE.md`, `PROCESS.md` — never `README.md`, which the app serves at `/readme/` as its own prose.
 
 ## 9 Maintaining This File
