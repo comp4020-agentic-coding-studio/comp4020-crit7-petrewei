@@ -65,8 +65,8 @@ const freeText = (free: number | null): string =>
                         <p class="clash">
                           Clashes with{" "}
                           {group.clashes
-                            .map((c) => `${c.label} (${c.meetings.map(meetingText).join("; ")})`)
-                            .join(" and ")}
+                            .map((c) => `${c.label}, ${c.meetings.map(meetingText).join(" / ")}`)
+                            .join("; ")}
                         </p>
                       )}
                       {i > 0 && (
