@@ -12,8 +12,8 @@ import { afterAll, describe, expect, inject, it } from "vitest";
 //   works without JavaScript: a button named `group` carries the group.
 // - The server rejects an unknown activity, a lecture, or a group the activity
 //   does not have with a 4xx, and the recorded allocation is unchanged.
-// - An allocated group that overlaps a lecture or another allocated group
-//   carries data-clash and names every course it clashes with in its text.
+// - Clashes are shown only in the week calendar, on the date they happen
+//   (spec/week.test.ts), so no group in the list is flagged or names a clash.
 // Data is the real S2 2026 timetable in src/data/timetable-2026-s2.json.
 const baseUrl = inject("baseUrl");
 
@@ -150,26 +150,15 @@ describe("allocation", () => {
     expect(res.status).toBe(400);
   });
 
-  // Lab 01 (Thu 11:00–13:00) overlaps the COMP4020 lecture (Thu 11:00–13:00)
-  // and the one-off COMP3500 lecture (Thu 10:00–12:00, 30/7 only).
-  it("flags an allocated group that clashes, and names what it clashes with", async () => {
+  // Lab 01 (Thu 11:00–13:00) overlaps the COMP4020 lecture every Thursday, but
+  // Peter wants a clash shown only in the week it happens.
+  it("does not flag a clashing allocated group in the list", async () => {
     await setAllocation(LAB, "01");
-    await setAllocation(TUT, "03");
     const doc = await page();
-    const lab = groupItem(doc, `${LAB}-01`);
-    expect(lab.hasAttribute("data-clash")).toBe(true);
-    expect(lab.textContent).toContain("COMP4020");
-    expect(lab.textContent).toContain("COMP3500");
-    expect(doc.querySelectorAll("[data-clash]")).toHaveLength(1);
-  });
-
-  // Lab 04 (Fri 15:00–17:00) overlaps nothing, and only allocated groups are
-  // compared, so lab 01 is no longer flagged either.
-  it("does not flag an allocated group that fits, or a clashing group not allocated", async () => {
-    await setAllocation(LAB, "04");
-    await setAllocation(TUT, "03");
-    const doc = await page();
-    expect(groupItem(doc, `${LAB}-04`).hasAttribute("data-clash")).toBe(false);
-    expect(groupItem(doc, `${LAB}-01`).hasAttribute("data-clash")).toBe(false);
+    expect(allocatedOf(doc, LAB)).toEqual([`${LAB}-01`]);
+    expect(doc.querySelectorAll("[data-activity] [data-clash]")).toHaveLength(0);
+    const list = [...doc.querySelectorAll("[data-activity]")].map((el) => el.textContent).join(" ");
+    expect(list).toContain("Group 01");
+    expect(list).not.toMatch(/clash/i);
   });
 });

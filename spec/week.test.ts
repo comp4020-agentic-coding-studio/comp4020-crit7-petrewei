@@ -102,6 +102,16 @@ describe("your week", () => {
     expect(clashing(await weekPage("?week=2"), "6/8")).toEqual([false]);
   });
 
+  // With lab 01 allocated, it and the COMP4020 lecture clash on Thu 6/8.
+  it("marks an allocated group that clashes on that date", async () => {
+    await record(LAB, "01");
+    const marked = slots(await weekPage("?week=2"), "6/8").filter((s) => s.classList.contains("slot-clash"));
+    const text = marked.map((s) => s.textContent?.replace(/\s+/g, " ")).join(" | ");
+    expect(marked).toHaveLength(2);
+    expect(text).toContain("COMP4020 Lecture");
+    expect(text).toContain("COMP3300 Computer lab group 01");
+  });
+
   it("links to the previous and next weeks, and stops at either end", async () => {
     const link = (doc: Document, rel: string) =>
       doc.querySelector(`a[rel="${rel}"]`)?.getAttribute("href") ?? null;

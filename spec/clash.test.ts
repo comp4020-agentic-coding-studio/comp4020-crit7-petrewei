@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Commitment, clashesFor, meetingsClash, parseWeeks } from "../src/lib/clash";
+import { meetingsClash, parseWeeks } from "../src/lib/clash";
 
 // The clash rule in CLAUDE.md §2: same weekday, one meeting starts before the
 // other ends, and at least one shared date. Meetings are from
@@ -51,31 +51,5 @@ describe("meetingsClash", () => {
 
   it("does not flag overlapping times on different weekdays", () => {
     expect(meetingsClash(comp3300LectureB, tut03)).toBe(false);
-  });
-});
-
-describe("clashesFor", () => {
-  const commitments: Commitment[] = [
-    { id: "COMP3300-ComA-01", label: "COMP3300 Computer lab 01", choosable: true, meetings: [lab01] },
-    { id: "COMP4020-LecA-01", label: "COMP4020 Lecture A", choosable: false, meetings: [comp4020Lecture] },
-    { id: "COMP3500-LecA-01", label: "COMP3500 Lecture A", choosable: false, meetings: [comp3500Lecture] },
-    {
-      id: "COMP4020-TutA-01",
-      label: "COMP4020 Tutorial 01",
-      choosable: true,
-      meetings: [tut01, tut01Makeup],
-    },
-  ];
-  const clashes = clashesFor(commitments);
-
-  it("lists every commitment an allocated group clashes with, and never itself", () => {
-    expect(clashes.get("COMP3300-ComA-01")?.map((c) => c.id).sort()).toEqual([
-      "COMP3500-LecA-01",
-      "COMP4020-LecA-01",
-    ]);
-  });
-
-  it("gives an allocated group that fits no clashes", () => {
-    expect(clashes.get("COMP4020-TutA-01") ?? []).toEqual([]);
   });
 });

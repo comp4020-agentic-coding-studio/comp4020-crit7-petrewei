@@ -1,0 +1,15 @@
+---
+// The site header on every page. The brand is a link, not a heading, so each
+// page keeps its own single h1.
+const path = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="/">ANU Timetable</a>
+    <nav aria-label="site">
+      <a href="/" aria-current={path === "/" ? "page" : undefined}>Timetable</a>
+      <a href="/readme/" aria-current={path.startsWith("/readme") ? "page" : undefined}>About</a>
+    </nav>
+  </div>
+</header>

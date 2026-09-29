@@ -6,7 +6,7 @@ The platform is fixed and is not restated here: `fly.toml`, the `Dockerfile`, `.
 
 ## 1 This Deliverable
 
-Crit 7, week 8: build the ANU system you wish existed. The slice is my MyTimetable tutorial and lab allocation, because MyTimetable shows no way to see how the allocated groups fit together across courses. The response is one page: each lab and tutorial's groups with the allocated one marked and recordable, clashes flagged on it, and a dated calendar one week at a time. Cutoff is Wednesday 30 September 2026 at 07:00; the crit is at 09:00.
+Crit 7, week 8: build the ANU system you wish existed. The slice is my MyTimetable tutorial and lab allocation, because MyTimetable shows no way to see how the allocated groups fit together across courses. The response is one page: each lab and tutorial's groups with the allocated one marked and recordable, and a dated calendar one week at a time with clashes marked on the dates they happen. Cutoff is Wednesday 30 September 2026 at 07:00; the crit is at 09:00.
 
 Where each spec line is held:
 
@@ -19,7 +19,7 @@ Where each spec line is held:
 
 - **Session data comes only from `src/data/timetable-2026-s2.json`, copied from MyTimetable.** If something is missing, say so; an invented session makes every clash result untrue.
 - **Keep my calendar feed URL, uni ID, email and MyTimetable screenshots out of the repo.** It goes public at the cutoff.
-- **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** An allocated group is compared with every lecture and with the allocated group of every other activity. Meetings overlap when one starts before the other ends, so back-to-back meetings do not clash.
+- **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** The week calendar compares every lecture and allocated group on each date, and marks a clash only there, never on the group list. Meetings overlap when one starts before the other ends, so back-to-back meetings do not clash.
 - **Week dates are calendar dates in 2026, never timestamps.** The Fly server runs in UTC, my machine in Canberra time, and daylight saving starts on 4 October, so a midnight timestamp can fall on a different day.
 - **The allocation form works without JavaScript.** Each group has a button named `group` whose value is its label, so the browser's own POST and the 303 redirect do the work (Lecture 7).
 - **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.

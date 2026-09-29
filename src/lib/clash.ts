@@ -54,19 +54,3 @@ export function meetingsClash(a: Meeting, b: Meeting): boolean {
   const bDays = parseWeeks(b.weeks);
   return [...parseWeeks(a.weeks)].some((day) => bDays.has(day));
 }
-
-// For each lab or tutorial group, every other commitment it clashes with.
-export function clashesFor<C extends Commitment>(commitments: C[]): Map<string, C[]> {
-  const clashes = new Map<string, C[]>();
-  for (const choice of commitments.filter((c) => c.choosable)) {
-    clashes.set(
-      choice.id,
-      commitments.filter(
-        (other) =>
-          other.id !== choice.id &&
-          choice.meetings.some((m) => other.meetings.some((n) => meetingsClash(m, n))),
-      ),
-    );
-  }
-  return clashes;
-}

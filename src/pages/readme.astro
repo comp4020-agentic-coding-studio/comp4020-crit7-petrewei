@@ -2,6 +2,7 @@
 // README.md, rendered: what this app is and what good looks like here,
 // published with the app. spec/readme.test.ts checks the whole of it is here.
 import * as readme from "../../README.md";
+import Header from "../components/Header.astro";
 import "../styles.css";
 
 const title = readme.getHeadings().find((h) => h.depth === 1)?.text ?? "README";
@@ -20,10 +21,7 @@ const html = (await readme.compiledContent()).replace(/(src|href)="public\//g, '
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <nav aria-label="site">
-      <a href="/">Preferences</a>
-      <a href="/readme/">About</a>
-    </nav>
-    <main set:html={html} />
+    <Header />
+    <main class="prose" set:html={html} />
   </body>
 </html>

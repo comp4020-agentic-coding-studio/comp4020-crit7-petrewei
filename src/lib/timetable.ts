@@ -1,9 +1,7 @@
 import {
   type Commitment,
-  clashesFor,
   dateOfDay,
   dayOfYear,
-  isOneOff,
   meetingsClash,
   parseWeeks,
   weekdayOf,
@@ -19,7 +17,6 @@ type GroupView = {
   free: number | null;
   allocated: boolean;
   meetings: MeetingView[];
-  clashes: Commitment<MeetingView>[];
 };
 
 type ActivityView = {
@@ -62,7 +59,6 @@ export function loadTimetable(): Timetable {
             free: g.free,
             allocated: g.label === allocated,
             meetings: meetingRows.filter((m) => m.groupId === g.id),
-            clashes: [],
           }))
           .sort((a, b) => a.label.localeCompare(b.label)),
       };
@@ -71,10 +67,6 @@ export function loadTimetable(): Timetable {
   const commitments = views.flatMap((activity) =>
     activity.groups.filter((g) => g.allocated).map((g) => commitment(activity, g)),
   );
-  const clashes = clashesFor(commitments);
-  for (const group of views.flatMap((a) => a.groups)) {
-    group.clashes = clashes.get(group.id) ?? [];
-  }
 
   return { choosable: views.filter((a) => a.groups.length > 1), commitments };
 }
@@ -90,12 +82,6 @@ const commitment = (activity: ActivityView, group: GroupView): Commitment<Meetin
     meetings: group.meetings,
   };
 };
-
-// "Thu 11:00–13:00, 30/7 only" for a one-off meeting, else with its weeks.
-export function meetingText(meeting: { day: string; start: string; end: string; weeks: string }): string {
-  const weeks = isOneOff(meeting.weeks) ? `${meeting.weeks} only` : `weeks ${meeting.weeks}`;
-  return `${meeting.day} ${meeting.start}–${meeting.end}, ${weeks}`;
-}
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 

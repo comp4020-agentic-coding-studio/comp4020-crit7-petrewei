@@ -1,6 +1,6 @@
 # ANU Timetable
 
-A replacement for one part of ANU's MyTimetable: seeing your tutorial and lab allocation. MyTimetable shows each activity's groups separately, and nothing shows how the allocated ones fit together across courses. This app lists the groups for my COMP3300 lab and COMP4020 tutorial with the allocated one marked, lets me record a new allocation, which it saves in SQLite, and flags any allocated group that overlaps a lecture or another allocated group, naming what it clashes with. A calendar shows one dated week at a time, with each lecture and allocated group on the dates it meets.
+A replacement for one part of ANU's MyTimetable: seeing your tutorial and lab allocation. MyTimetable shows each activity's groups separately, and nothing shows how the allocated ones fit together across courses. This app lists the groups for my COMP3300 lab and COMP4020 tutorial with the allocated one marked, lets me record a new allocation, which it saves in SQLite, and shows a calendar one dated week at a time, with each lecture and allocated group on the dates it meets. A meeting that overlaps another on the same date is marked as a clash in that week only.
 
 It models my own Second Semester 2026 timetable and has no login, so anyone with the URL can change the recorded allocation.
 
