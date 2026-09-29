@@ -23,7 +23,7 @@ Where each spec line is held:
 - **Week dates are calendar dates in 2026, never timestamps.** The Fly server runs in UTC, my machine in Canberra time, and daylight saving starts on 4 October, so a midnight timestamp can fall on a different day.
 - **The ranking form works without JavaScript.** Each group has a button named `order` whose value is the ranking it produces, so the browser's own POST and the 303 redirect do the work (Lecture 7).
 - **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.
-- **Keep `/api/events` when the guestbook goes.** CI's post-deploy job fails without it once the repo is public.
+- **Keep `/api/events` streaming.** CI's post-deploy job fails without it once the repo is public.
 
 ## 3 Working Practices
 
@@ -44,7 +44,7 @@ Where each spec line is held:
 
 - **Write the sensor before a change worth holding to.** When a judgement is worth keeping, encode it as a check first; the contract then outlives the edit and rejects later drift on its own.
 - **Write the assertion so it can only pass for the right reason.** Assert that the thing is used, because a forbid-only check is satisfied by an empty page.
-- **Expect a check to become the target.** The clash tests use one real clash and one session that fits, so a page that flags lab 01 by name would pass them; ask what a check would let through as well as what it would catch.
+- **Expect a check to become the target.** The clash tests use the real Thursday clashes and one session that fits, so a page that hard-codes those pairs would pass them; ask what a check would let through as well as what it would catch.
 - **Treat a red check as correct until proven otherwise.** Update one when the contract it encodes has genuinely changed, and never weaken one to fit output you did not intend.
 - **Confirm the failure a check describes can actually reach it.** If the build, the schema or the type checker already rejects that state, the test only ever reports green.
 - **Treat `.github/workflows/` as harness.** Edit it only to restore a check that drifted from the initial commit's intent, and diff against that commit first.
