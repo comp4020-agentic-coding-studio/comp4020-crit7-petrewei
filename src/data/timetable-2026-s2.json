@@ -1,0 +1,166 @@
+{
+  "semester": "Second Semester, 2026",
+  "source": "MyTimetable: the student's calendar feed and the ComA and TutA group lists, copied 2026-09-29",
+  "courses": [
+    {
+      "code": "COMP3300",
+      "title": "Operating Systems Implementation",
+      "activities": [
+        {
+          "code": "LecA",
+          "kind": "Lecture",
+          "allocated": "01",
+          "groups": [
+            {
+              "group": "01",
+              "free": null,
+              "meetings": [
+                { "day": "Mon", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "27/7-31/8, 21/9-26/10" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "LecB",
+          "kind": "Lecture",
+          "allocated": "01",
+          "groups": [
+            {
+              "group": "01",
+              "free": null,
+              "meetings": [
+                { "day": "Tue", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "28/7-1/9, 22/9-27/10" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "ComA",
+          "kind": "Computer lab",
+          "allocated": "04",
+          "groups": [
+            {
+              "group": "01",
+              "free": 0,
+              "meetings": [
+                { "day": "Thu", "start": "11:00", "end": "13:00", "location": "Comp Lab 1.24_Hanna Neumann Bldg 145", "weeks": "30/7-27/8, 17/9-15/10" }
+              ]
+            },
+            {
+              "group": "02",
+              "free": 0,
+              "meetings": [
+                { "day": "Fri", "start": "13:00", "end": "15:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+              ]
+            },
+            {
+              "group": "03",
+              "free": 0,
+              "meetings": [
+                { "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N109_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+              ]
+            },
+            {
+              "group": "04",
+              "free": 2,
+              "meetings": [
+                { "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "COMP3500",
+      "title": "Computing Team Project",
+      "activities": [
+        {
+          "code": "LecA",
+          "kind": "Lecture",
+          "allocated": "01",
+          "groups": [
+            {
+              "group": "01",
+              "free": null,
+              "meetings": [
+                { "day": "Thu", "start": "10:00", "end": "12:00", "location": "Manning Clark Hall Rm 1.04_Lowitja O'Donoghue Cultural Centre Bldg 153", "weeks": "30/7" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "COMP4020",
+      "title": "Advanced Topics in Human-Centred Agentic Coding Studio",
+      "activities": [
+        {
+          "code": "LecA",
+          "kind": "Lecture",
+          "allocated": "01",
+          "groups": [
+            {
+              "group": "01",
+              "free": null,
+              "meetings": [
+                { "day": "Thu", "start": "11:00", "end": "13:00", "location": "Rm 2.02_Fulton Muir Bldg 95", "weeks": "30/7-3/9, 24/9-29/10" }
+              ]
+            }
+          ]
+        },
+        {
+          "code": "TutA",
+          "kind": "Tutorial",
+          "allocated": "03",
+          "groups": [
+            {
+              "group": "01",
+              "free": 0,
+              "meetings": [
+                { "day": "Mon", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10" },
+                { "day": "Tue", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "6/10" }
+              ]
+            },
+            {
+              "group": "02",
+              "free": 0,
+              "meetings": [
+                { "day": "Mon", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10" },
+                { "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 3.05_Marie Reay Bldg 155", "weeks": "7/10" }
+              ]
+            },
+            {
+              "group": "03",
+              "free": 0,
+              "meetings": [
+                { "day": "Wed", "start": "09:00", "end": "10:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+              ]
+            },
+            {
+              "group": "04",
+              "free": 1,
+              "meetings": [
+                { "day": "Wed", "start": "10:30", "end": "12:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+              ]
+            },
+            {
+              "group": "05",
+              "free": 0,
+              "meetings": [
+                { "day": "Wed", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+              ]
+            },
+            {
+              "group": "06",
+              "free": 0,
+              "meetings": [
+                { "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
