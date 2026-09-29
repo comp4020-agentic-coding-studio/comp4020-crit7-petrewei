@@ -10,7 +10,8 @@ import { afterEach, expect, it } from "vitest";
 // Fly keeps the database on a volume, so every restart and deploy boots the
 // app against data that is already there. The shared test server always gets a
 // fresh database, so this boots the built server twice on one database file and
-// checks that the second boot neither duplicates nor loses the seeded groups.
+// checks that the second boot keeps a saved ranking and neither duplicates nor
+// loses the seeded groups.
 let server: ChildProcess | undefined;
 
 const stop = async () => {
@@ -55,10 +56,18 @@ const groupsOnPage = async (baseUrl: string): Promise<string[]> => {
   return [...doc.querySelectorAll("[data-group]")].map((el) => el.getAttribute("data-group") ?? "");
 };
 
-it("shows the same groups after a restart on an existing database", async () => {
+it("keeps the seeded groups and a saved ranking across a restart", async () => {
   const databasePath = join(mkdtempSync(join(tmpdir(), "restart-db-")), "app.db");
 
-  const first = await groupsOnPage(await boot(databasePath));
+  const baseUrl = await boot(databasePath);
+  const saved = await fetch(new URL("/api/preferences", baseUrl), {
+    method: "POST",
+    headers: { origin: baseUrl },
+    body: new URLSearchParams({ activity: "COMP3300-ComA", order: "02,04,03,01" }),
+    redirect: "manual",
+  });
+  expect(saved.status).toBe(303);
+  const first = await groupsOnPage(baseUrl);
   expect(first.length, "the first boot shows no [data-group] elements").toBeGreaterThan(0);
   await stop();
 

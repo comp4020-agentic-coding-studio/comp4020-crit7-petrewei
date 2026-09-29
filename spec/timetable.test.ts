@@ -53,35 +53,13 @@ const formFor = (doc: Document, activity: string): HTMLFormElement => {
   return form;
 };
 
-// What a browser sends for `form` when `submitter` is pressed: every enabled,
-// named control's value, plus the pressed button's name and value.
-const formData = (form: HTMLFormElement, submitter?: HTMLButtonElement): URLSearchParams => {
-  const data = new URLSearchParams();
-  for (const el of form.elements) {
-    const control = el as HTMLInputElement;
-    if (!control.name || control.disabled) continue;
-    if (control.type === "submit" || control.type === "button" || control.type === "image") continue;
-    if ((control.type === "checkbox" || control.type === "radio") && !control.checked) continue;
-    if (el instanceof el.ownerDocument.defaultView!.HTMLSelectElement) {
-      for (const option of el.selectedOptions) data.append(el.name, option.value);
-      continue;
-    }
-    data.append(control.name, control.value);
-  }
-  if (submitter?.name) data.append(submitter.name, submitter.value);
-  return data;
+// What a browser sends when `submitter` is pressed, urlencoded as a form is.
+const formData = (form: HTMLFormElement, submitter: HTMLButtonElement): URLSearchParams => {
+  const data = new form.ownerDocument.defaultView!.FormData(form, submitter);
+  return new URLSearchParams([...data].map(([name, value]) => [name, String(value)]));
 };
 
 describe("timetable preferences", () => {
-  it("lists every COMP3300 lab group", async () => {
-    expect([...rankedGroups(await page(), LAB)].sort()).toEqual([
-      `${LAB}-01`,
-      `${LAB}-02`,
-      `${LAB}-03`,
-      `${LAB}-04`,
-    ]);
-  });
-
   it("keeps a saved ranking across a reload", async () => {
     const res = await rank(LAB, ["02", "04", "03", "01"]);
     expect(res.status).toBe(303);
@@ -109,11 +87,10 @@ describe("timetable preferences", () => {
     const submitter = [...form.querySelectorAll("button")].find(
       (b) => b.name === "order" && b.value !== current,
     );
-    expect(submitter, "no button named `order` that changes the ranking").toBeDefined();
+    if (!submitter) throw new Error("no button named `order` that changes the ranking");
     const data = formData(form, submitter);
     expect(data.get("activity")).toBe(LAB);
-    const order = data.get("order");
-    expect(order, "the form sends no `order` field").toBeTruthy();
+    expect(data.getAll("order")).toEqual([submitter.value]);
 
     const res = await fetch(new URL("/api/preferences", baseUrl), {
       method: "POST",
@@ -123,7 +100,7 @@ describe("timetable preferences", () => {
     });
     expect(res.status).toBe(303);
     expect(rankedGroups(await page(), LAB)).toEqual(
-      (order ?? "").split(",").map((g) => `${LAB}-${g}`),
+      submitter.value.split(",").map((g) => `${LAB}-${g}`),
     );
   });
 
@@ -153,9 +130,12 @@ describe("timetable preferences", () => {
     expect(first.textContent).toContain("COMP4020");
   });
 
-  // Lab 04 (Fri 15:00–17:00) overlaps nothing else in the timetable.
-  it("does not flag a first choice that fits", async () => {
+  // Lab 04 (Fri 15:00–17:00) overlaps nothing, and only first choices are
+  // compared, so lab 01 ranked second is no longer flagged either.
+  it("does not flag a first choice that fits, or a clashing group ranked lower", async () => {
     await rank(LAB, ["04", "01", "02", "03"]);
-    expect(groupItem(await page(), `${LAB}-04`).hasAttribute("data-clash")).toBe(false);
+    const doc = await page();
+    expect(groupItem(doc, `${LAB}-04`).hasAttribute("data-clash")).toBe(false);
+    expect(groupItem(doc, `${LAB}-01`).hasAttribute("data-clash")).toBe(false);
   });
 });
