@@ -37,6 +37,8 @@ export function seed(db: BetterSQLite3Database): void {
             activityId: activityRow.id,
             label: group.group,
             free: group.free,
+            name: "name" in group ? group.name : null,
+            tutor: "tutor" in group ? group.tutor : null,
           };
           tx.insert(groups)
             .values(groupRow)

@@ -1,6 +1,7 @@
 // The page's words in English and Simplified Chinese. Codes are never
-// translated: course and activity codes, group labels, times, dates, and the
-// rooms and lecturers as MyTimetable names them.
+// translated: course and activity codes, group labels, times, dates, the
+// rooms and lecturers as MyTimetable names them, and the tutorial groups'
+// names and tutors.
 export type Locale = "en" | "zh";
 
 // The English course titles come from the MyTimetable copy; these are keyed by
@@ -11,11 +12,12 @@ export const COURSE_TITLES_ZH: Record<string, string> = {
   COMP4020: "以人为本的智能体编程工作室高级专题",
 };
 
-// Activity kinds and meeting types, as the MyTimetable copy spells them.
+// Activity kinds and meeting types, as the MyTimetable copy spells them. The
+// meeting type "Computer Laboratory" reads "Laboratory" in English too.
 const TERMS_ZH: Record<string, string> = {
   Lecture: "讲座",
-  "Computer lab": "计算机实验课",
-  "Computer Laboratory": "计算机实验课",
+  "Computer lab": "实验课",
+  "Computer Laboratory": "实验课",
   Tutorial: "辅导课",
   "Tutorial Makeup": "辅导补课",
 };
@@ -36,9 +38,10 @@ const en = {
   heading: "Second Semester 2026",
   lede: "Your lab and tutorial groups, and your classes one week at a time; clashes are marked red in the week.",
   courseTitle: (_code: string, title: string) => title,
-  term: (term: string) => term,
+  term: (term: string) => (term === "Computer Laboratory" ? "Laboratory" : term),
   day: (day: string) => day,
   group: (label: string) => `Group ${label}`,
+  tutor: (name: string) => `Tutor: ${name}`,
   allocate: "Allocate",
   allocated: "Allocated",
   allocateLabel: (label: string) => `Allocate group ${label}`,
@@ -73,11 +76,12 @@ const zh: typeof en = {
   courseTitle: (code, title) => COURSE_TITLES_ZH[code] ?? title,
   term: (term) => TERMS_ZH[term] ?? term,
   day: (day) => WEEKDAYS_ZH[day] ?? day,
-  group: (label) => `第 ${label} 组`,
+  group: (label) => `小组 ${label}`,
+  tutor: (name) => `助教：${name}`,
   allocate: "分配",
   allocated: "已分配",
-  allocateLabel: (label) => `分配第 ${label} 组`,
-  allocatedLabel: (label) => `第 ${label} 组已分配`,
+  allocateLabel: (label) => `分配小组 ${label}`,
+  allocatedLabel: (label) => `小组 ${label} 已分配`,
   free: (free) => (free === 0 ? "已满" : `剩余 ${free} 个名额`),
   oneOff: (date) => `仅 ${date}`,
   makeupAt: (when) => `${when}，`,
@@ -91,7 +95,7 @@ const zh: typeof en = {
   nothingOn: "无课",
   clash: "冲突",
   entry: ({ courseCode, kind, code, group }) =>
-    group ? `${courseCode} ${zh.term(kind)} 第 ${group} 组` : `${courseCode} ${zh.term(kind)}（${code}）`,
+    group ? `${courseCode} ${zh.term(kind)} 小组 ${group}` : `${courseCode} ${zh.term(kind)}（${code}）`,
 };
 
 export const STRINGS: Record<Locale, typeof en> = { en, zh };

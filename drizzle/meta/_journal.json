@@ -43,6 +43,13 @@
       "when": 1790691475473,
       "tag": "0005_faulty_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790700273239,
+      "tag": "0006_dazzling_human_cannonball",
+      "breakpoints": true
     }
   ]
 }

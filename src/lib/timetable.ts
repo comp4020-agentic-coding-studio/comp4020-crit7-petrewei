@@ -16,6 +16,8 @@ type GroupView = {
   id: string;
   label: string;
   free: number | null;
+  name: string | null;
+  tutor: string | null;
   allocated: boolean;
   meetings: MeetingView[];
 };
@@ -59,6 +61,8 @@ export function loadTimetable(): Timetable {
             id: g.id,
             label: g.label,
             free: g.free,
+            name: g.name,
+            tutor: g.tutor,
             allocated: g.label === allocated,
             meetings: meetingRows.filter((m) => m.groupId === g.id),
           }))

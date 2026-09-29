@@ -10,7 +10,7 @@ It models my own Second Semester 2026 timetable (COMP3300, COMP3500 and COMP4020
 
 ## Features
 
-- **Groups at a glance.** Each lab and tutorial lists its groups with their regular times and free places. A card's details give every meeting's type, dates and room, including one-off makeups such as a tutorial moved for a public holiday.
+- **Groups at a glance.** Each lab and tutorial lists its groups with their regular times and free places, and each COMP4020 tutorial group its name and tutor. A card's details give every meeting's type, dates and room, including one-off makeups such as a tutorial moved for a public holiday.
 - **Record an allocation.** Press Allocate on a group to record it. The allocation is saved in SQLite, so it survives a reload, a restart and a redeploy.
 - **Your week.** A Monday-to-Friday calendar of your lectures and allocated groups for the chosen teaching week, with previous and next week links.
 - **Clashes on the right dates.** Two meetings clash when they fall on the same weekday, overlap in time, and share a date. A one-off meeting clashes only in its own week: the COMP3500 lecture on 30 July clashes with lab 01 that week alone.
@@ -19,7 +19,7 @@ It models my own Second Semester 2026 timetable (COMP3300, COMP3500 and COMP4020
 
 ## Data
 
-Sessions and groups were copied from MyTimetable on 29 September 2026 into `src/data/timetable-2026-s2.json`, and the database is seeded from that file on every boot. The calendar feed URL stays out of the repo because it gives read access to my timetable.
+Sessions and groups were copied from MyTimetable on 29 September 2026 into `src/data/timetable-2026-s2.json`, with the COMP4020 tutorial group names and tutors from the course website on 30 September, and the database is seeded from that file on every boot. The calendar feed URL stays out of the repo because it gives read access to my timetable.
 
 ## Tech Stack
 

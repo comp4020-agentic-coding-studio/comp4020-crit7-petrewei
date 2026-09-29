@@ -1,6 +1,6 @@
 {
   "semester": "Second Semester, 2026",
-  "source": "MyTimetable: the student's calendar feed, the ComA and TutA group lists, and each activity's details page, copied 2026-09-29",
+  "source": "MyTimetable: the student's calendar feed, the ComA and TutA group lists, and each activity's details page, copied 2026-09-29. The COMP4020 tutorial group names and tutors are from the course website's tutorial list, copied 2026-09-30",
   "courses": [
     {
       "code": "COMP3300",
@@ -122,6 +122,8 @@
           "groups": [
             {
               "group": "01",
+              "name": "Shítāo",
+              "tutor": "Ushini Attanayake",
               "free": 0,
               "meetings": [
                 { "type": "Tutorial", "activity": "01-P1", "day": "Mon", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10", "staff": null },
@@ -130,6 +132,8 @@
             },
             {
               "group": "02",
+              "name": "Bādà",
+              "tutor": "Ushini Attanayake",
               "free": 0,
               "meetings": [
                 { "type": "Tutorial", "activity": "02-P1", "day": "Mon", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10", "staff": null },
@@ -138,6 +142,8 @@
             },
             {
               "group": "03",
+              "name": "Báishí",
+              "tutor": "Tom Griffiths",
               "free": 0,
               "meetings": [
                 { "type": "Tutorial", "activity": "03", "day": "Wed", "start": "09:00", "end": "10:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
@@ -145,6 +151,8 @@
             },
             {
               "group": "04",
+              "name": "Dàchī",
+              "tutor": "Tom Griffiths",
               "free": 1,
               "meetings": [
                 { "type": "Tutorial", "activity": "04", "day": "Wed", "start": "10:30", "end": "12:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
@@ -152,6 +160,8 @@
             },
             {
               "group": "05",
+              "name": "Yúnlín",
+              "tutor": "Bill McAlister",
               "free": 0,
               "meetings": [
                 { "type": "Tutorial", "activity": "05", "day": "Wed", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
@@ -159,6 +169,8 @@
             },
             {
               "group": "06",
+              "name": "Liùrú",
+              "tutor": "Bill McAlister",
               "free": 0,
               "meetings": [
                 { "type": "Tutorial", "activity": "06", "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }

@@ -18,7 +18,9 @@ import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocat
 //   as a tutorial moved for a public holiday, is listed only in its details.
 // - Each activity names its course by title only, and a card's details give
 //   each meeting's MyTimetable type and activity code, such as
-//   "Tutorial Makeup 01-P2".
+//   "Tutorial Makeup 01-P2", except that "Computer Laboratory" reads "Laboratory".
+// - Each COMP4020 tutorial card gives its group's name and tutor, from the
+//   course website's tutorial list, and no other card names either.
 // - The server rejects an unknown activity, a lecture, or a group the activity
 //   does not have with a 4xx, and the recorded allocation is unchanged.
 // - Clashes are shown only in the week calendar, on the date they happen
@@ -122,9 +124,29 @@ describe("allocation", () => {
     const doc = await page();
     const details = (group: string) =>
       groupItem(doc, group).querySelector("details")?.textContent?.replace(/\s+/g, " ") ?? "";
-    expect(details(`${LAB}-04`)).toContain("Computer Laboratory 04");
+    expect(details(`${LAB}-04`)).toContain("Laboratory 04");
+    expect(details(`${LAB}-04`)).not.toContain("Computer");
     expect(details(`${TUT}-01`)).toMatch(/Tutorial 01-P1.*Tutorial Makeup 01-P2/);
     expect(details(`${TUT}-03`)).toContain("Tutorial 03");
+  });
+
+  it("gives each COMP4020 tutorial card its group's name and tutor", async () => {
+    const doc = await page();
+    const line = (group: string, selector: string) =>
+      groupItem(doc, group).querySelector(selector)?.textContent?.replace(/\s+/g, " ").trim();
+    const tutorials = ["01", "02", "03", "04", "05", "06"].map((g) => [
+      line(`${TUT}-${g}`, ".team"),
+      line(`${TUT}-${g}`, ".tutor"),
+    ]);
+    expect(tutorials).toEqual([
+      ["Shítāo", "Tutor: Ushini Attanayake"],
+      ["Bādà", "Tutor: Ushini Attanayake"],
+      ["Báishí", "Tutor: Tom Griffiths"],
+      ["Dàchī", "Tutor: Tom Griffiths"],
+      ["Yúnlín", "Tutor: Bill McAlister"],
+      ["Liùrú", "Tutor: Bill McAlister"],
+    ]);
+    expect(doc.querySelectorAll(`[data-activity="${LAB}"] :is(.team, .tutor)`)).toHaveLength(0);
   });
 
   it.each([

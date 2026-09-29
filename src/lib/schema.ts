@@ -37,6 +37,9 @@ export const groups = sqliteTable("groups", {
     .references(() => activities.id),
   label: text().notNull(),
   free: int(),
+  // A COMP4020 tutorial group's name and tutor, from the course website.
+  name: text(),
+  tutor: text(),
 });
 
 export const meetings = sqliteTable("meetings", {

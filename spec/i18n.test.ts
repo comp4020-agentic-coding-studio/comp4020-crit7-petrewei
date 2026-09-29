@@ -10,15 +10,18 @@ import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocat
 //   header links to its counterpart in the other language, keeping ?week.
 // - Words are translated: course titles, activity kinds, meeting types,
 //   weekdays and every label on the page. Codes are not: course codes,
-//   activity codes such as LecA and 01-P2, group labels, times and dates, and
-//   the rooms and lecturers as MyTimetable names them.
+//   activity codes such as LecA and 01-P2, group labels, times and dates, the
+//   rooms and lecturers as MyTimetable names them, and the tutorial groups'
+//   names and tutors as the course website gives them.
 // - The zh form posts the same fields plus locale=zh, and the 303 goes back to
 //   /zh/?week=N. Any other locale value redirects as the English form does.
 // - /zh/readme/ carries the whole of README.zh-CN.md.
 type Timetable = {
   courses: {
     code: string;
-    activities: { groups: { meetings: { location: string; staff: string | null }[] }[] }[];
+    activities: {
+      groups: { name?: string; tutor?: string; meetings: { location: string; staff: string | null }[] }[];
+    }[];
   }[];
 };
 const timetable: Timetable = JSON.parse(readFileSync("src/data/timetable-2026-s2.json", "utf8"));
@@ -40,7 +43,7 @@ describe("Simplified Chinese timetable", () => {
     const doc = await page("/zh/");
     const inActivity = (activity: string, selector: string) =>
       squash(doc.querySelector(`[data-activity="${activity}"] ${selector}`)?.textContent);
-    expect(inActivity(LAB, "h2")).toBe("COMP3300 计算机实验课");
+    expect(inActivity(LAB, "h2")).toBe("COMP3300 实验课");
     expect(inActivity(LAB, ".course")).toBe("操作系统实现");
     expect(inActivity(TUT, "h2")).toBe("COMP4020 辅导课");
     expect(inActivity(TUT, ".course")).toBe("以人为本的智能体编程工作室高级专题");
@@ -51,14 +54,17 @@ describe("Simplified Chinese timetable", () => {
       return [squash(card?.querySelector(".group-name")?.textContent), squash(button?.textContent), button?.value];
     });
     expect(buttons).toEqual([
-      ["第 01 组", "分配", "01"],
-      ["第 04 组", "已分配", "04"],
+      ["小组 01", "分配", "01"],
+      ["小组 04", "已分配", "04"],
     ]);
 
     const tut01 = doc.querySelector(`[data-group="${TUT}-01"]`);
+    expect(squash(tut01?.querySelector(".team")?.textContent)).toBe("Shítāo");
+    expect(squash(tut01?.querySelector(".tutor")?.textContent)).toBe("助教：Ushini Attanayake");
     expect([...(tut01?.querySelectorAll(":scope > .when") ?? [])].map((el) => squash(el.textContent))).toEqual([
       "周一 14:00–15:30",
     ]);
+    expect(squash(doc.querySelector(`[data-group="${LAB}-04"] details`)?.textContent)).toMatch(/^详情\s*实验课 04/);
     expect(squash(tut01?.querySelector("details")?.textContent)).toMatch(
       /^详情\s*辅导课 01-P1.*辅导补课 01-P2\s*周二 14:00–15:30，\s*仅 6\/10\s*Rm 4\.03_Marie Reay Bldg 155$/,
     );
@@ -75,7 +81,9 @@ describe("Simplified Chinese timetable", () => {
     if (week === "11") expect(text).toContain("辅导补课");
 
     const names = timetable.courses.flatMap((c) =>
-      c.activities.flatMap((a) => a.groups.flatMap((g) => g.meetings.flatMap((m) => [m.location, m.staff ?? ""]))),
+      c.activities.flatMap((a) =>
+        a.groups.flatMap((g) => [g.name ?? "", g.tutor ?? "", ...g.meetings.flatMap((m) => [m.location, m.staff ?? ""])]),
+      ),
     );
     for (const name of names.filter(Boolean)) text = text.replaceAll(name, "");
     const codes = /COMP\d{4}|\b(Lec|Com|Tut)[A-Z]\b/g;
@@ -101,7 +109,7 @@ describe("Simplified Chinese timetable", () => {
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("/zh/?week=3");
     const monday = (await page("/zh/?week=3")).querySelector('[data-week] [data-date="10/8"]');
-    expect(squash(monday?.textContent)).toMatch(/^周一 10\/8.*14:00–15:30\s*COMP4020 辅导课 第 01 组/);
+    expect(squash(monday?.textContent)).toMatch(/^周一 10\/8.*14:00–15:30\s*COMP4020 辅导课 小组 01/);
   });
 
   it("redirects an unknown locale as the English form does", async () => {

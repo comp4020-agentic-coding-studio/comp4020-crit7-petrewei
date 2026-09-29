@@ -66,6 +66,8 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                           {group.allocated ? t.allocated : t.allocate}
                         </button>
                       </div>
+                      {group.name && <p class="team">{group.name}</p>}
+                      {group.tutor && <p class="tutor">{t.tutor(group.tutor)}</p>}
                       {regular(group.meetings).map((meeting) => (
                         <p class="when">
                           {t.day(meeting.day)} {meeting.start}–{meeting.end}

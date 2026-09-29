@@ -144,10 +144,20 @@ h2 {
   font-weight: 700;
 }
 
+.team,
+.tutor,
 .when,
 .free {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.team {
+  font-style: italic;
+}
+
+.tutor {
+  color: var(--muted);
 }
 
 .free {
