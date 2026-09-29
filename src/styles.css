@@ -96,6 +96,18 @@ button {
   font: inherit;
 }
 
+.week-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+}
+
+.week-range {
+  font-weight: 600;
+}
+
 .week {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -125,7 +137,7 @@ button {
   overflow-wrap: anywhere;
 }
 
-.day li.first-choice {
+.day li.allocated {
   border-left-color: #0b5fff;
 }
 

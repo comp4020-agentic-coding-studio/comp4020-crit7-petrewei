@@ -17,10 +17,19 @@ export type Commitment<M extends Meeting = Meeting> = {
 // UTC, or across the daylight-saving change on 4 October (CLAUDE.md §2).
 const DAYS_BEFORE_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
-const dayOfYear = (date: string): number => {
+export const dayOfYear = (date: string): number => {
   const [day, month] = date.split("/").map(Number);
   return DAYS_BEFORE_MONTH[month - 1] + day;
 };
+
+// The inverse of dayOfYear: 208 is "27/7".
+export const dateOfDay = (day: number): string => {
+  const month = DAYS_BEFORE_MONTH.findLastIndex((before) => before < day);
+  return `${day - DAYS_BEFORE_MONTH[month]}/${month + 1}`;
+};
+
+// 1 January 2026 was a Thursday, so Monday is 0 and Friday is 4.
+export const weekdayOf = (day: number): number => (day + 2) % 7;
 
 // MyTimetable's weeks text, e.g. "30/7-27/8, 17/9-15/10" or "6/10": each
 // range is one meeting a week from its first date to its last.

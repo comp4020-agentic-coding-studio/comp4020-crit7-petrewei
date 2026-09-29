@@ -1,9 +1,9 @@
 ---
-import { loadTimetable, meetingText, weekByDay } from "../lib/timetable";
+import { loadTimetable, meetingText, weekView } from "../lib/timetable";
 import "../styles.css";
 
-const { ranked, commitments } = loadTimetable();
-const week = weekByDay(commitments);
+const { ranked, calendar } = loadTimetable();
+const week = weekView(calendar, Astro.url.searchParams.get("week"));
 
 // The ranking that pressing "Move up" on position i produces.
 const moveUp = (labels: string[], i: number): string => {
@@ -85,24 +85,35 @@ const freeText = (free: number | null): string =>
         })
       }
 
-      <section class="week-section" aria-labelledby="heading-week">
+      <section class="week-section" aria-labelledby="heading-week" data-week={week.number}>
         <h2 id="heading-week">Your week</h2>
-        <p class="course">Lectures and your first choices. A meeting marked "clash" overlaps another on at least one date.</p>
+        <p class="course">
+          Your lectures and allocated tutorial and lab groups, on the dates they meet. A meeting marked
+          "clash" overlaps another on the same date.
+        </p>
+        <nav class="week-nav" aria-label="weeks">
+          {week.prev ? <a href={`/?week=${week.prev}`} rel="prev">Previous week</a> : <span />}
+          <span class="week-range">
+            Week {week.number}: {week.days[0].day} {week.days[0].date} to {week.days[4].day} {week.days[4].date}
+          </span>
+          {week.next ? <a href={`/?week=${week.next}`} rel="next">Next week</a> : <span />}
+        </nav>
         <div class="week">
           {
-            week.map(({ day, entries }) => (
-              <div class="day">
-                <h3>{day}</h3>
+            week.days.map(({ day, date, entries }) => (
+              <div class="day" data-date={date}>
+                <h3>
+                  {day} {date}
+                </h3>
                 <ul>
                   {entries.length === 0 && <li class="slot-empty">Nothing on</li>}
                   {entries.map((entry) => (
-                    <li data-slot={entry.key} class:list={{ "first-choice": entry.firstChoice, "slot-clash": entry.clash }}>
+                    <li data-slot={entry.key} class:list={{ allocated: entry.ranked, "slot-clash": entry.clash }}>
                       <span class="slot-time">
                         {entry.meeting.start}–{entry.meeting.end}
                       </span>
                       <span class="slot-title">{entry.title}</span>
                       <span class="slot-where">{entry.meeting.location}</span>
-                      {entry.oneOff && <span class="slot-note">{entry.meeting.weeks} only</span>}
                       {entry.clash && <span class="slot-note slot-clash-note">clash</span>}
                     </li>
                   ))}
