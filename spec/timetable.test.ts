@@ -150,6 +150,9 @@ describe("allocation", () => {
       ["Liùrú", "Tutor: Bill McAlister"],
     ]);
     expect(doc.querySelectorAll(`[data-activity="${TUT}"] .card-head .group-name + .team`)).toHaveLength(6);
+    expect(groupItem(doc, `${TUT}-01`).querySelector(".group-title")?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+      "Group 01 Shítāo",
+    );
     expect(doc.querySelectorAll(`[data-activity="${LAB}"] :is(.team, .tutor)`)).toHaveLength(0);
   });
 

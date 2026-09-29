@@ -58,7 +58,7 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                       <div class="card-head">
                         <span class="group-title">
                           <span class="group-name">{t.group(group.label)}</span>
-                          {group.name && <span class="team">{group.name}</span>}
+                          {group.name && <> <span class="team">{group.name}</span></>}
                         </span>
                         <button
                           name="group"
