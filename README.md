@@ -1,4 +1,4 @@
-# Tutorial and lab preferences
+# ANU Timetable
 
 A replacement for one part of ANU's MyTimetable: ranking your preferences for tutorial and lab groups. MyTimetable asks you to rank each activity's groups separately, and nothing shows how your choices fit together across courses, so you find a clash after you have submitted. This app lists the groups for my COMP3300 lab and COMP4020 tutorial, lets me reorder them, saves the ranking in SQLite, and flags any first choice that overlaps a lecture or another first choice, naming what it clashes with.
 
