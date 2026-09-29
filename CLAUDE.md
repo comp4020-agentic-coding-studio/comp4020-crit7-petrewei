@@ -52,7 +52,8 @@ Where each spec line is held:
 ## 6 Git and CI
 
 - **Commit small and often, and say why in the message.** The commit trail is evidence of process; the diff shows what changed, and the message is the only place the reason survives.
-- **Commit only on green, then push immediately.** Stage files by name. The one exception is a check written ahead of the thing that satisfies it: red on purpose, and the message says so.
+- **Commit only on green.** Stage files by name. The one exception is a check written ahead of the thing that satisfies it: red on purpose, and the message says so.
+- **Push straight after every commit, without asking.** The marker and CI only see what is on GitHub.
 - **Read a red CI run properly.** `gh run watch`, then `gh run view --log-failed`, for the actual failing command and its output instead of "the build failed".
 - **Only put a number in a commit message you have just measured.** Read it from the command output in the same step as writing the message.
 
