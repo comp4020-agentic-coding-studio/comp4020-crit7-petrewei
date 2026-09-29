@@ -20,6 +20,10 @@ const datesText = (weeks: string): string => (isOneOff(weeks) ? t.oneOff(weeks) 
 // for a public holiday, is listed only in the details.
 const isMakeup = (meeting: { type: string }): boolean => meeting.type.endsWith("Makeup");
 const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.filter((m) => !isMakeup(m));
+
+// MyTimetable joins a room and its building with "_", as in
+// "Rm 4.03_Marie Reay Bldg 155"; each goes on its own line.
+const place = (location: string): string[] => location.split("_");
 ---
 
 <!doctype html>
@@ -88,7 +92,7 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                                 {isMakeup(meeting) && t.makeupAt(`${t.day(meeting.day)} ${meeting.start}–${meeting.end}`)}
                                 {datesText(meeting.weeks)}
                               </span>
-                              <span>{meeting.location}</span>
+                              {place(meeting.location).map((line) => <span>{line}</span>)}
                             </li>
                           ))}
                         </ul>
@@ -131,7 +135,7 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                         {entry.meeting.start}–{entry.meeting.end}
                       </span>
                       <span class="slot-title">{t.entry(entry.name)}</span>
-                      <span class="slot-where">{entry.meeting.location}</span>
+                      {place(entry.meeting.location).map((line) => <span class="slot-where">{line}</span>)}
                       {entry.meeting.staff && <span class="slot-where">{entry.meeting.staff}</span>}
                       {entry.tutor && <span class="slot-where">{entry.tutor}</span>}
                       {isMakeup(entry.meeting) && <span class="slot-note">{t.term(entry.meeting.type)}</span>}

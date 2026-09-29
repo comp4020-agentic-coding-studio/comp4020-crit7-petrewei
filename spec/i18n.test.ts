@@ -66,7 +66,7 @@ describe("Simplified Chinese timetable", () => {
     ]);
     expect(squash(doc.querySelector(`[data-group="${LAB}-04"] details`)?.textContent)).toMatch(/^详情\s*实验课 04/);
     expect(squash(tut01?.querySelector("details")?.textContent)).toMatch(
-      /^详情\s*辅导课 01-P1.*辅导补课 01-P2\s*周二 14:00–15:30，\s*仅 6\/10\s*Rm 4\.03_Marie Reay Bldg 155$/,
+      /^详情\s*辅导课 01-P1.*辅导补课 01-P2\s*周二 14:00–15:30，\s*仅 6\/10\s*Rm 4\.03\s*Marie Reay Bldg 155$/,
     );
   });
 
@@ -82,7 +82,7 @@ describe("Simplified Chinese timetable", () => {
 
     const names = timetable.courses.flatMap((c) =>
       c.activities.flatMap((a) =>
-        a.groups.flatMap((g) => [g.name ?? "", g.tutor ?? "", ...g.meetings.flatMap((m) => [m.location, m.staff ?? ""])]),
+        a.groups.flatMap((g) => [g.name ?? "", g.tutor ?? "", ...g.meetings.flatMap((m) => [...m.location.split("_"), m.staff ?? ""])]),
       ),
     );
     for (const name of names.filter(Boolean)) text = text.replaceAll(name, "");

@@ -19,7 +19,9 @@ import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocat
 // - Each activity is headed by its course code and kind, with "Computer lab"
 //   reading "Lab", and names its course by title only. A card's details give
 //   each meeting's MyTimetable type and activity code, such as
-//   "Tutorial Makeup 01-P2", except that "Computer Laboratory" reads "Laboratory".
+//   "Tutorial Makeup 01-P2", except that "Computer Laboratory" reads "Laboratory",
+//   and its room and building on separate lines where MyTimetable joins them
+//   with "_".
 // - Each COMP4020 tutorial card gives its group's name, right of the group
 //   number in the card's head, and its tutor, from the
 //   course website's tutorial list, and no other card names either.
@@ -131,6 +133,15 @@ describe("allocation", () => {
     expect(details(`${LAB}-04`)).not.toContain("Computer");
     expect(details(`${TUT}-01`)).toMatch(/Tutorial 01-P1.*Tutorial Makeup 01-P2/);
     expect(details(`${TUT}-03`)).toContain("Tutorial 03");
+  });
+
+  it("puts a meeting's room and building on separate lines", async () => {
+    const doc = await page();
+    const lines = [...groupItem(doc, `${LAB}-01`).querySelectorAll(".meetings li > span")].map((el) =>
+      el.textContent?.replace(/\s+/g, " ").trim(),
+    );
+    expect(lines.slice(-2)).toEqual(["Comp Lab 1.24", "Hanna Neumann Bldg 145"]);
+    expect(doc.querySelector("main")?.textContent).not.toContain("_");
   });
 
   it("gives each COMP4020 tutorial card its group's name and tutor", async () => {

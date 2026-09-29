@@ -8,6 +8,7 @@ import { LAB, page, record, restoreAllocation, TUT } from "./app";
 // - The week holds every lecture and the allocated group of each lab and
 //   tutorial, only on the dates they meet, and follows a recorded allocation.
 // - A slot that overlaps another slot on the same date has class slot-clash.
+// - A slot gives its room and building on separate lines.
 // - A lecture slot names its lecturer, a COMP4020 tutorial slot its tutor, and
 //   a makeup session says it is one. A lab reads "Lab", not "Computer lab".
 // - Links with rel="prev" and rel="next" go to the neighbouring weeks, and
@@ -90,6 +91,14 @@ describe("your week", () => {
     expect(marked).toHaveLength(2);
     expect(text).toContain("COMP4020 Lecture");
     expect(text).toContain("COMP3300 Lab group 01");
+  });
+
+  it("puts the room and building on separate lines", async () => {
+    const [slot] = slots(await weekPage("?week=2"), "5/8");
+    const lines = [...slot.querySelectorAll(":scope > span")].map((el) => el.textContent?.trim());
+    expect(lines).toContain("Rm 4.03");
+    expect(lines).toContain("Marie Reay Bldg 155");
+    expect(allSlotText(await weekPage("?week=1"))).not.toContain("_");
   });
 
   it("names each lecture's lecturer", async () => {
