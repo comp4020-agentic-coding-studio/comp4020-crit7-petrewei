@@ -96,7 +96,7 @@ h2 {
 
 .groups {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
   gap: 0.6rem;
   margin: 0;
   padding: 0;
@@ -118,22 +118,13 @@ h2 {
 .card-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.25rem;
 }
 
 .group-name {
   font-weight: 700;
-}
-
-.tag {
-  padding: 0 0.4rem;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .when,
@@ -183,20 +174,25 @@ summary {
 }
 
 button {
-  width: 100%;
-  margin-top: 0.2rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0 0.45rem;
   border: 1px solid var(--accent);
-  border-radius: 6px;
+  border-radius: 4px;
   background: #fff;
   color: var(--accent);
   font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
-button:hover {
+button:hover,
+button:disabled {
   background: var(--accent);
   color: #fff;
+}
+
+button:disabled {
+  cursor: default;
 }
 
 .week-section {

@@ -9,9 +9,10 @@ import { afterAll, describe, expect, inject, it } from "vitest";
 //   allocation and redirects back to / with 303.
 // - The page's own form for an activity submits those two fields, so the form
 //   and the handler cannot drift apart while direct POSTs stay green. It works
-//   without JavaScript: a button named `group` carries the group. The form also
-//   carries the week shown, and the 303 goes back to /?week=N, so the week
-//   being viewed shows the new allocation.
+//   without JavaScript: an Allocate button named `group` beside each group's
+//   name carries the group, and the allocated group's is a disabled Allocated
+//   button. The form also carries the week shown, and the 303 goes back to
+//   /?week=N, so the week being viewed shows the new allocation.
 // - A card shows a group's regular meeting times. A one-off replacement, such
 //   as a tutorial moved for a public holiday, is listed only in its details.
 // - Each activity names its class number and the courses it is shared with,
@@ -162,6 +163,24 @@ describe("allocation", () => {
     const times = [...card.querySelectorAll(":scope > .when")].map((el) => el.textContent?.trim());
     expect(times).toEqual(["Mon 14:00–15:30"]);
     expect(card.querySelector("details")?.textContent).toMatch(/Tue 14:00–15:30.*6\/10 only/s);
+  });
+
+  it("puts Allocate beside each group's name, and a disabled Allocated on the allocated one", async () => {
+    await setAllocation(LAB, "04");
+    const doc = await page();
+    const heads = ["01", "02", "03", "04"].map((g) => {
+      const card = groupItem(doc, `${LAB}-${g}`);
+      expect(card.querySelector("details button") === null, `no button in the details of ${g}`).toBe(true);
+      const button = card.querySelector<HTMLButtonElement>(".card-head button");
+      if (!button) throw new Error(`no button beside the name of group ${g}`);
+      return [button.textContent?.trim(), button.name, button.value, button.disabled];
+    });
+    expect(heads).toEqual([
+      ["Allocate", "group", "01", false],
+      ["Allocate", "group", "02", false],
+      ["Allocate", "group", "03", false],
+      ["Allocated", "group", "04", true],
+    ]);
   });
 
   it("names each activity's class and the courses it is shared with", async () => {

@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { choosableLabels, saveAllocation } from "../../lib/allocation";
 
-// Each "This is my group" button on the page posts its activity, group and the
+// Each Allocate button on the page posts its activity, group and the
 // week on screen, so the form needs no JavaScript and the 303 re-renders that
 // week from SQLite. Any client can post here, so activity and group are checked.
 export const POST: APIRoute = async ({ request, redirect }) => {

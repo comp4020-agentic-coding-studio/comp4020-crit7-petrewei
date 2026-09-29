@@ -55,7 +55,14 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                     >
                       <div class="card-head">
                         <span class="group-name">Group {group.label}</span>
-                        {group.allocated && <span class="tag">Allocated</span>}
+                        <button
+                          name="group"
+                          value={group.label}
+                          disabled={group.allocated}
+                          aria-label={group.allocated ? `Group ${group.label} is allocated` : `Allocate group ${group.label}`}
+                        >
+                          {group.allocated ? "Allocated" : "Allocate"}
+                        </button>
                       </div>
                       {regular(group.meetings).map((meeting) => (
                         <p class="when">
@@ -79,11 +86,6 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                             </li>
                           ))}
                         </ul>
-                        {!group.allocated && (
-                          <button name="group" value={group.label} aria-label={`Group ${group.label} is my group`}>
-                            This is my group
-                          </button>
-                        )}
                       </details>
                     </li>
                   ))}
