@@ -5,7 +5,11 @@ import { rankableLabels, saveRanking } from "../../lib/preferences";
 // ranking, so the form needs no JavaScript and the 303 re-renders the page
 // from SQLite. Any client can post here, so the ranking is checked in full.
 export const POST: APIRoute = async ({ request, redirect }) => {
-  const form = await request.formData();
+  // formData() throws on a body that is not a form, such as JSON.
+  const form = await request.formData().catch(() => null);
+  if (!form) {
+    return reject("expected a form body");
+  }
   const activity = String(form.get("activity") ?? "");
   const order = String(form.get("order") ?? "").split(",");
 
