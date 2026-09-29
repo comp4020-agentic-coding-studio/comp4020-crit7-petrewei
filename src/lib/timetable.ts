@@ -34,7 +34,7 @@ type ActivityView = {
 // Labs and tutorials have more than one group to choose from. The
 // commitments are every lecture plus the allocated group of each lab and
 // tutorial: the recorded one, else the allocation copied from MyTimetable.
-type Item = Commitment<MeetingView> & { name: EntryName };
+type Item = Commitment<MeetingView> & { name: EntryName; tutor: string | null };
 type Timetable = { choosable: ActivityView[]; commitments: Item[] };
 
 export function loadTimetable(): Timetable {
@@ -87,6 +87,7 @@ const commitment = (activity: ActivityView, group: GroupView): Item => {
       code: activity.code,
       group: choosable ? group.label : null,
     },
+    tutor: group.tutor,
     choosable,
     meetings: group.meetings,
   };
@@ -131,7 +132,7 @@ export function weekView(calendar: Item[], requested: string | null) {
     const entries = calendar
       .flatMap((item) =>
         item.meetings
-          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, name: item.name, choosable: item.choosable, meeting }))
+          .map((meeting, j) => ({ key: `${item.id}-${j}`, owner: item.id, name: item.name, tutor: item.tutor, choosable: item.choosable, meeting }))
           .filter(({ meeting }) => meeting.day === day && parseWeeks(meeting.weeks).has(date)),
       )
       .sort((a, b) => a.meeting.start.localeCompare(b.meeting.start));

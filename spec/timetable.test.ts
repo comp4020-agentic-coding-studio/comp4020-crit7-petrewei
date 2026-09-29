@@ -16,10 +16,12 @@ import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocat
 //   /?week=N, so the week being viewed shows the new allocation.
 // - A card shows a group's regular meeting times. A one-off replacement, such
 //   as a tutorial moved for a public holiday, is listed only in its details.
-// - Each activity names its course by title only, and a card's details give
+// - Each activity is headed by its course code and kind, with "Computer lab"
+//   reading "Lab", and names its course by title only. A card's details give
 //   each meeting's MyTimetable type and activity code, such as
 //   "Tutorial Makeup 01-P2", except that "Computer Laboratory" reads "Laboratory".
-// - Each COMP4020 tutorial card gives its group's name and tutor, from the
+// - Each COMP4020 tutorial card gives its group's name, right of the group
+//   number in the card's head, and its tutor, from the
 //   course website's tutorial list, and no other card names either.
 // - The server rejects an unknown activity, a lecture, or a group the activity
 //   does not have with a 4xx, and the recorded allocation is unchanged.
@@ -117,6 +119,7 @@ describe("allocation", () => {
     const course = (activity: string) =>
       doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ").trim();
     expect(course(LAB)).toBe("Operating Systems Implementation");
+    expect(doc.querySelector(`[data-activity="${LAB}"] h2`)?.textContent?.replace(/\s+/g, " ").trim()).toBe("COMP3300 Lab");
     expect(course(TUT)).toBe("Advanced Topics in Human-Centred Agentic Coding Studio");
   });
 
@@ -146,6 +149,7 @@ describe("allocation", () => {
       ["Yúnlín", "Tutor: Bill McAlister"],
       ["Liùrú", "Tutor: Bill McAlister"],
     ]);
+    expect(doc.querySelectorAll(`[data-activity="${TUT}"] .card-head .group-name + .team`)).toHaveLength(6);
     expect(doc.querySelectorAll(`[data-activity="${LAB}"] :is(.team, .tutor)`)).toHaveLength(0);
   });
 

@@ -13,7 +13,9 @@ export const COURSE_TITLES_ZH: Record<string, string> = {
 };
 
 // Activity kinds and meeting types, as the MyTimetable copy spells them. The
-// meeting type "Computer Laboratory" reads "Laboratory" in English too.
+// kind "Computer lab" reads "Lab" and the meeting type "Computer Laboratory"
+// reads "Laboratory" in English too.
+const TERMS_EN: Record<string, string> = { "Computer lab": "Lab", "Computer Laboratory": "Laboratory" };
 const TERMS_ZH: Record<string, string> = {
   Lecture: "讲座",
   "Computer lab": "实验课",
@@ -38,7 +40,7 @@ const en = {
   heading: "Second Semester 2026",
   lede: "Your lab and tutorial groups, and your classes one week at a time; clashes are marked red in the week.",
   courseTitle: (_code: string, title: string) => title,
-  term: (term: string) => (term === "Computer Laboratory" ? "Laboratory" : term),
+  term: (term: string) => TERMS_EN[term] ?? term,
   day: (day: string) => day,
   group: (label: string) => `Group ${label}`,
   tutor: (name: string) => `Tutor: ${name}`,
@@ -60,7 +62,7 @@ const en = {
   nothingOn: "Nothing on",
   clash: "clash",
   entry: ({ courseCode, kind, code, group }: EntryName) =>
-    group ? `${courseCode} ${kind} group ${group}` : `${courseCode} ${kind} (${code})`,
+    group ? `${courseCode} ${en.term(kind)} group ${group}` : `${courseCode} ${en.term(kind)} (${code})`,
 };
 
 const zh: typeof en = {

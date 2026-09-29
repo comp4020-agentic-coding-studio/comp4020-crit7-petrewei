@@ -56,7 +56,10 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                       data-allocated={group.allocated ? "" : undefined}
                     >
                       <div class="card-head">
-                        <span class="group-name">{t.group(group.label)}</span>
+                        <span class="group-title">
+                          <span class="group-name">{t.group(group.label)}</span>
+                          {group.name && <span class="team">{group.name}</span>}
+                        </span>
                         <button
                           name="group"
                           value={group.label}
@@ -66,7 +69,6 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                           {group.allocated ? t.allocated : t.allocate}
                         </button>
                       </div>
-                      {group.name && <p class="team">{group.name}</p>}
                       {group.tutor && <p class="tutor">{t.tutor(group.tutor)}</p>}
                       {regular(group.meetings).map((meeting) => (
                         <p class="when">
@@ -131,6 +133,7 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
                       <span class="slot-title">{t.entry(entry.name)}</span>
                       <span class="slot-where">{entry.meeting.location}</span>
                       {entry.meeting.staff && <span class="slot-where">{entry.meeting.staff}</span>}
+                      {entry.tutor && <span class="slot-where">{entry.tutor}</span>}
                       {isMakeup(entry.meeting) && <span class="slot-note">{t.term(entry.meeting.type)}</span>}
                       {entry.clash && <span class="slot-note slot-clash-note">{t.clash}</span>}
                     </li>

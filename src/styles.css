@@ -144,7 +144,6 @@ h2 {
   font-weight: 700;
 }
 
-.team,
 .tutor,
 .when,
 .free {
@@ -153,6 +152,7 @@ h2 {
 }
 
 .team {
+  margin-left: 0.3rem;
   font-style: italic;
 }
 

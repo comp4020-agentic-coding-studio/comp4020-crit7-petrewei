@@ -109,7 +109,7 @@ describe("Simplified Chinese timetable", () => {
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("/zh/?week=3");
     const monday = (await page("/zh/?week=3")).querySelector('[data-week] [data-date="10/8"]');
-    expect(squash(monday?.textContent)).toMatch(/^周一 10\/8.*14:00–15:30\s*COMP4020 辅导课 小组 01/);
+    expect(squash(monday?.textContent)).toMatch(/^周一 10\/8.*14:00–15:30\s*COMP4020 辅导课 小组 01.*Ushini Attanayake/);
   });
 
   it("redirects an unknown locale as the English form does", async () => {

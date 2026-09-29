@@ -8,7 +8,8 @@ import { LAB, page, record, restoreAllocation, TUT } from "./app";
 // - The week holds every lecture and the allocated group of each lab and
 //   tutorial, only on the dates they meet, and follows a recorded allocation.
 // - A slot that overlaps another slot on the same date has class slot-clash.
-// - A lecture slot names its lecturer, and a makeup session says it is one.
+// - A lecture slot names its lecturer, a COMP4020 tutorial slot its tutor, and
+//   a makeup session says it is one. A lab reads "Lab", not "Computer lab".
 // - Links with rel="prev" and rel="next" go to the neighbouring weeks, and
 //   are absent at either end.
 // - Without ?week, or with one outside 1–14, the page shows the week holding
@@ -49,7 +50,7 @@ describe("your week", () => {
 
   it("shows the allocated lab and tutorial, and no other group", async () => {
     const doc = await weekPage("?week=2");
-    expect(slotText(doc, "7/8").join()).toMatch(/15:00–17:00.*COMP3300 Computer lab group 04/);
+    expect(slotText(doc, "7/8").join()).toMatch(/15:00–17:00.*COMP3300 Lab group 04/);
     expect(slotText(doc, "5/8").join()).toMatch(/09:00–10:30.*COMP4020 Tutorial group 03/);
     expect(allSlotText(doc)).not.toMatch(/group 0[1256]/);
   });
@@ -57,7 +58,7 @@ describe("your week", () => {
   it("follows a recorded allocation", async () => {
     await record(LAB, "01");
     const doc = await weekPage("?week=2");
-    expect(slotText(doc, "6/8").join()).toMatch(/11:00–13:00.*COMP3300 Computer lab group 01/);
+    expect(slotText(doc, "6/8").join()).toMatch(/11:00–13:00.*COMP3300 Lab group 01/);
     expect(allSlotText(doc)).not.toContain("group 04");
   });
 
@@ -88,7 +89,7 @@ describe("your week", () => {
     const text = marked.map((s) => s.textContent?.replace(/\s+/g, " ")).join(" | ");
     expect(marked).toHaveLength(2);
     expect(text).toContain("COMP4020 Lecture");
-    expect(text).toContain("COMP3300 Computer lab group 01");
+    expect(text).toContain("COMP3300 Lab group 01");
   });
 
   it("names each lecture's lecturer", async () => {
@@ -96,6 +97,13 @@ describe("your week", () => {
       /COMP3500 Lecture.*Nisansala Yatapanage.*COMP4020 Lecture.*Benjamin John Swift/,
     );
     expect(slotText(await weekPage("?week=2"), "3/8").join()).toMatch(/COMP3300 Lecture.*Shoaib Akram/);
+  });
+
+  it("names the allocated tutorial's tutor", async () => {
+    expect(slotText(await weekPage("?week=2"), "5/8").join()).toMatch(/COMP4020 Tutorial group 03.*Tom Griffiths/);
+    await record(TUT, "05");
+    expect(slotText(await weekPage("?week=2"), "5/8").join()).toMatch(/COMP4020 Tutorial group 05.*Bill McAlister/);
+    expect(allSlotText(await weekPage("?week=2"))).not.toContain("Computer");
   });
 
   // Tutorial 01 meets on Tue 6/10 in week 11 instead of Mon 5/10, Labour Day.
