@@ -39,10 +39,7 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
               <h2 id={`heading-${activity.id}`}>
                 {activity.courseCode} {activity.kind}
               </h2>
-              <p class="course">
-                {activity.courseTitle}, class {activity.classNumber}
-                {activity.sharedWith && `, shared with ${activity.sharedWith}`}
-              </p>
+              <p class="course">{activity.courseTitle}</p>
               <form method="post" action="/api/allocation">
                 <input type="hidden" name="activity" value={activity.id} />
                 <input type="hidden" name="week" value={week.number} />

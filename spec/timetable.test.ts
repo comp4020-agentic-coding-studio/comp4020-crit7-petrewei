@@ -15,9 +15,9 @@ import { afterAll, describe, expect, inject, it } from "vitest";
 //   /?week=N, so the week being viewed shows the new allocation.
 // - A card shows a group's regular meeting times. A one-off replacement, such
 //   as a tutorial moved for a public holiday, is listed only in its details.
-// - Each activity names its class number and the courses it is shared with,
-//   and a card's details give each meeting's MyTimetable type and activity
-//   code, such as "Tutorial Makeup 01-P2".
+// - Each activity names its course by title only, and a card's details give
+//   each meeting's MyTimetable type and activity code, such as
+//   "Tutorial Makeup 01-P2".
 // - The server rejects an unknown activity, a lecture, or a group the activity
 //   does not have with a 4xx, and the recorded allocation is unchanged.
 // - Clashes are shown only in the week calendar, on the date they happen
@@ -183,12 +183,12 @@ describe("allocation", () => {
     ]);
   });
 
-  it("names each activity's class and the courses it is shared with", async () => {
+  it("names each activity's course by its title alone", async () => {
     const doc = await page();
     const course = (activity: string) =>
-      doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ") ?? "";
-    expect(course(LAB)).toMatch(/class 8682.*shared with COMP6330/i);
-    expect(course(TUT)).toMatch(/class 9056.*shared with COMP8020/i);
+      doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+    expect(course(LAB)).toBe("Operating Systems Implementation");
+    expect(course(TUT)).toBe("Advanced Topics in Human-Centred Agentic Coding Studio");
   });
 
   it("gives each meeting's type and activity code in the card's details", async () => {

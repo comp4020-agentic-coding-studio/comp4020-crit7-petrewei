@@ -23,8 +23,6 @@ type ActivityView = {
   id: string;
   courseCode: string;
   courseTitle: string;
-  classNumber: string;
-  sharedWith: string;
   code: string;
   kind: string;
   groups: GroupView[];
@@ -51,8 +49,6 @@ export function loadTimetable(): Timetable {
         id: activity.id,
         courseCode: activity.courseCode,
         courseTitle: courseRows.get(activity.courseCode)?.title ?? "",
-        classNumber: courseRows.get(activity.courseCode)?.classNumber ?? "",
-        sharedWith: courseRows.get(activity.courseCode)?.sharedWith ?? "",
         code: activity.code,
         kind: activity.kind,
         groups: groupRows
