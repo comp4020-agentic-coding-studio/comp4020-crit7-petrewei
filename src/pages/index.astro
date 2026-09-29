@@ -12,12 +12,10 @@ const freeText = (free: number | null): string =>
 
 const datesText = (weeks: string): string => (isOneOff(weeks) ? `${weeks} only` : weeks.replaceAll("-", "–"));
 
-// A card shows a group's regular times. A one-off replacement, such as a
-// tutorial moved for a public holiday, is listed only in the details.
-const regular = <M extends { weeks: string }>(meetings: M[]): M[] => {
-  const recurring = meetings.filter((m) => !isOneOff(m.weeks));
-  return recurring.length > 0 ? recurring : meetings;
-};
+// A card shows a group's regular times. A makeup, such as a tutorial moved
+// for a public holiday, is listed only in the details.
+const isMakeup = (meeting: { type: string }): boolean => meeting.type.endsWith("Makeup");
+const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.filter((m) => !isMakeup(m));
 ---
 
 <!doctype html>
@@ -41,7 +39,10 @@ const regular = <M extends { weeks: string }>(meetings: M[]): M[] => {
               <h2 id={`heading-${activity.id}`}>
                 {activity.courseCode} {activity.kind}
               </h2>
-              <p class="course">{activity.courseTitle}</p>
+              <p class="course">
+                {activity.courseTitle}, class {activity.classNumber}
+                {activity.sharedWith && `, shared with ${activity.sharedWith}`}
+              </p>
               <form method="post" action="/api/allocation">
                 <input type="hidden" name="activity" value={activity.id} />
                 <input type="hidden" name="week" value={week.number} />
@@ -67,9 +68,11 @@ const regular = <M extends { weeks: string }>(meetings: M[]): M[] => {
                         <ul class="meetings">
                           {group.meetings.map((meeting) => (
                             <li>
+                              <span class="meeting-type">
+                                {meeting.type} {meeting.activity}
+                              </span>
                               <span>
-                                {!regular(group.meetings).includes(meeting) &&
-                                  `${meeting.day} ${meeting.start}–${meeting.end}, `}
+                                {isMakeup(meeting) && `${meeting.day} ${meeting.start}–${meeting.end}, `}
                                 {datesText(meeting.weeks)}
                               </span>
                               <span>{meeting.location}</span>
@@ -120,6 +123,8 @@ const regular = <M extends { weeks: string }>(meetings: M[]): M[] => {
                       </span>
                       <span class="slot-title">{entry.title}</span>
                       <span class="slot-where">{entry.meeting.location}</span>
+                      {entry.meeting.staff && <span class="slot-where">{entry.meeting.staff}</span>}
+                      {isMakeup(entry.meeting) && <span class="slot-note">{entry.meeting.type}</span>}
                       {entry.clash && <span class="slot-note slot-clash-note">clash</span>}
                     </li>
                   ))}

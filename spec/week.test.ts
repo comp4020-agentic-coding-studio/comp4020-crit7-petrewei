@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, inject, it } from "vitest";
 // - The week holds every lecture and the allocated group of each lab and
 //   tutorial, only on the dates they meet, and follows a recorded allocation.
 // - A slot that overlaps another slot on the same date has class slot-clash.
+// - A lecture slot names its lecturer, and a makeup session says it is one.
 // - Links with rel="prev" and rel="next" go to the neighbouring weeks, and
 //   are absent at either end.
 // - Without ?week, or with one outside 1–14, the page shows the week holding
@@ -110,6 +111,21 @@ describe("your week", () => {
     expect(marked).toHaveLength(2);
     expect(text).toContain("COMP4020 Lecture");
     expect(text).toContain("COMP3300 Computer lab group 01");
+  });
+
+  it("names each lecture's lecturer", async () => {
+    expect(slotText(await weekPage("?week=1"), "30/7").join(" | ")).toMatch(
+      /COMP3500 Lecture.*Nisansala Yatapanage.*COMP4020 Lecture.*Benjamin John Swift/,
+    );
+    expect(slotText(await weekPage("?week=2"), "3/8").join()).toMatch(/COMP3300 Lecture.*Shoaib Akram/);
+  });
+
+  // Tutorial 01 meets on Tue 6/10 in week 11 instead of Mon 5/10, Labour Day.
+  it("marks a makeup session as one", async () => {
+    await record(TUT, "01");
+    const doc = await weekPage("?week=11");
+    expect(slotText(doc, "6/10").join()).toMatch(/14:00–15:30.*COMP4020 Tutorial group 01.*Tutorial Makeup/);
+    expect(slotText(doc, "5/10").join()).not.toContain("Tutorial");
   });
 
   it("links to the previous and next weeks, and stops at either end", async () => {

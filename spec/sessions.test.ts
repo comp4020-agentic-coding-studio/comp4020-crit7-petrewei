@@ -39,3 +39,22 @@ it("lists exactly the MyTimetable groups for every choosable activity", () => {
     expect([...listed].sort(), activity.id).toEqual([...activity.groups].sort());
   }
 });
+
+// The details page gives every meeting a type and an activity code, and every
+// lecture a lecturer; a meeting missing them was not copied from it.
+it("carries MyTimetable's type and activity code on every meeting", () => {
+  type Meeting = { type: string; activity: string; staff: string | null };
+  const raw = JSON.parse(readFileSync("src/data/timetable-2026-s2.json", "utf8")) as {
+    courses: { class: string; activities: { kind: string; groups: { meetings: Meeting[] }[] }[] }[];
+  };
+  for (const course of raw.courses) {
+    expect(course.class).toMatch(/^\d{4}$/);
+    for (const activity of course.activities) {
+      for (const meeting of activity.groups.flatMap((g) => g.meetings)) {
+        expect(meeting.type).toMatch(/^(Lecture|Computer Laboratory|Tutorial|Tutorial Makeup)$/);
+        expect(meeting.activity).toMatch(/^\d{2}(-P\d)?$/);
+        if (activity.kind === "Lecture") expect(meeting.staff).toBeTruthy();
+      }
+    }
+  }
+});

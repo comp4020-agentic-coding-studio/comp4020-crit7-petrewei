@@ -15,6 +15,9 @@ export const groupId = (activity: string, label: string): string => `${activity}
 export const courses = sqliteTable("courses", {
   code: text().primaryKey(),
   title: text().notNull(),
+  // MyTimetable's class number, and the courses taught in the same sessions.
+  classNumber: text("class_number").notNull().default(""),
+  sharedWith: text("shared_with").notNull().default(""),
 });
 
 export const activities = sqliteTable("activities", {
@@ -46,6 +49,10 @@ export const meetings = sqliteTable("meetings", {
   end: text().notNull(),
   location: text().notNull(),
   weeks: text().notNull(),
+  // As MyTimetable's details page gives them, e.g. "Tutorial Makeup" and "01-P2".
+  type: text().notNull().default(""),
+  activity: text().notNull().default(""),
+  staff: text(),
 });
 
 // The only state a visitor changes: the group recorded as allocated for a lab

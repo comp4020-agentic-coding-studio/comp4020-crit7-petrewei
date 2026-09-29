@@ -23,6 +23,8 @@ type ActivityView = {
   id: string;
   courseCode: string;
   courseTitle: string;
+  classNumber: string;
+  sharedWith: string;
   code: string;
   kind: string;
   groups: GroupView[];
@@ -34,7 +36,7 @@ type ActivityView = {
 type Timetable = { choosable: ActivityView[]; commitments: Commitment<MeetingView>[] };
 
 export function loadTimetable(): Timetable {
-  const titles = new Map(db.select().from(courses).all().map((c) => [c.code, c.title]));
+  const courseRows = new Map(db.select().from(courses).all().map((c) => [c.code, c]));
   const recorded = new Map(db.select().from(allocations).all().map((a) => [a.activityId, a.groupLabel]));
   const meetingRows = db.select().from(meetings).all();
   const groupRows = db.select().from(groups).all();
@@ -48,7 +50,9 @@ export function loadTimetable(): Timetable {
       return {
         id: activity.id,
         courseCode: activity.courseCode,
-        courseTitle: titles.get(activity.courseCode) ?? "",
+        courseTitle: courseRows.get(activity.courseCode)?.title ?? "",
+        classNumber: courseRows.get(activity.courseCode)?.classNumber ?? "",
+        sharedWith: courseRows.get(activity.courseCode)?.sharedWith ?? "",
         code: activity.code,
         kind: activity.kind,
         groups: groupRows

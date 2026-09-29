@@ -1,10 +1,12 @@
 {
   "semester": "Second Semester, 2026",
-  "source": "MyTimetable: the student's calendar feed and the ComA and TutA group lists, copied 2026-09-29",
+  "source": "MyTimetable: the student's calendar feed, the ComA and TutA group lists, and each activity's details page, copied 2026-09-29",
   "courses": [
     {
       "code": "COMP3300",
       "title": "Operating Systems Implementation",
+      "class": "8682",
+      "sharedWith": ["COMP6330"],
       "activities": [
         {
           "code": "LecA",
@@ -13,9 +15,9 @@
           "groups": [
             {
               "group": "01",
-              "free": null,
+              "free": 14,
               "meetings": [
-                { "day": "Mon", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "27/7-31/8, 21/9-26/10" }
+                { "type": "Lecture", "activity": "01", "day": "Mon", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "27/7-31/8, 21/9-26/10", "staff": "Shoaib Akram" }
               ]
             }
           ]
@@ -27,9 +29,9 @@
           "groups": [
             {
               "group": "01",
-              "free": null,
+              "free": 14,
               "meetings": [
-                { "day": "Tue", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "28/7-1/9, 22/9-27/10" }
+                { "type": "Lecture", "activity": "01", "day": "Tue", "start": "09:00", "end": "11:00", "location": "Lec Theatre_Engineering Bldg 32", "weeks": "28/7-1/9, 22/9-27/10", "staff": "Shoaib Akram" }
               ]
             }
           ]
@@ -43,28 +45,28 @@
               "group": "01",
               "free": 0,
               "meetings": [
-                { "day": "Thu", "start": "11:00", "end": "13:00", "location": "Comp Lab 1.24_Hanna Neumann Bldg 145", "weeks": "30/7-27/8, 17/9-15/10" }
+                { "type": "Computer Laboratory", "activity": "01", "day": "Thu", "start": "11:00", "end": "13:00", "location": "Comp Lab 1.24_Hanna Neumann Bldg 145", "weeks": "30/7-27/8, 17/9-15/10", "staff": null }
               ]
             },
             {
               "group": "02",
               "free": 0,
               "meetings": [
-                { "day": "Fri", "start": "13:00", "end": "15:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+                { "type": "Computer Laboratory", "activity": "02", "day": "Fri", "start": "13:00", "end": "15:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10", "staff": null }
               ]
             },
             {
               "group": "03",
               "free": 0,
               "meetings": [
-                { "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N109_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+                { "type": "Computer Laboratory", "activity": "03", "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N109_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10", "staff": null }
               ]
             },
             {
               "group": "04",
               "free": 2,
               "meetings": [
-                { "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10" }
+                { "type": "Computer Laboratory", "activity": "04", "day": "Fri", "start": "15:00", "end": "17:00", "location": "Rm N112_Skaidrite Darius Bldg 108", "weeks": "31/7-28/8, 18/9-16/10", "staff": null }
               ]
             }
           ]
@@ -74,6 +76,8 @@
     {
       "code": "COMP3500",
       "title": "Computing Team Project",
+      "class": "8685",
+      "sharedWith": ["COMP4500", "COMP8715"],
       "activities": [
         {
           "code": "LecA",
@@ -82,9 +86,9 @@
           "groups": [
             {
               "group": "01",
-              "free": null,
+              "free": 108,
               "meetings": [
-                { "day": "Thu", "start": "10:00", "end": "12:00", "location": "Manning Clark Hall Rm 1.04_Lowitja O'Donoghue Cultural Centre Bldg 153", "weeks": "30/7" }
+                { "type": "Lecture", "activity": "01", "day": "Thu", "start": "10:00", "end": "12:00", "location": "Manning Clark Hall Rm 1.04_Lowitja O’Donoghue Cultural Centre Bldg 153", "weeks": "30/7", "staff": "Nisansala Yatapanage" }
               ]
             }
           ]
@@ -94,6 +98,8 @@
     {
       "code": "COMP4020",
       "title": "Advanced Topics in Human-Centred Agentic Coding Studio",
+      "class": "9056",
+      "sharedWith": ["COMP8020"],
       "activities": [
         {
           "code": "LecA",
@@ -102,9 +108,9 @@
           "groups": [
             {
               "group": "01",
-              "free": null,
+              "free": 0,
               "meetings": [
-                { "day": "Thu", "start": "11:00", "end": "13:00", "location": "Rm 2.02_Fulton Muir Bldg 95", "weeks": "30/7-3/9, 24/9-29/10" }
+                { "type": "Lecture", "activity": "01", "day": "Thu", "start": "11:00", "end": "13:00", "location": "Rm 2.02_Fulton Muir Bldg 95", "weeks": "30/7-3/9, 24/9-29/10", "staff": "Benjamin John Swift" }
               ]
             }
           ]
@@ -118,44 +124,44 @@
               "group": "01",
               "free": 0,
               "meetings": [
-                { "day": "Mon", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10" },
-                { "day": "Tue", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "6/10" }
+                { "type": "Tutorial", "activity": "01-P1", "day": "Mon", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10", "staff": null },
+                { "type": "Tutorial Makeup", "activity": "01-P2", "day": "Tue", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "6/10", "staff": null }
               ]
             },
             {
               "group": "02",
               "free": 0,
               "meetings": [
-                { "day": "Mon", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10" },
-                { "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 3.05_Marie Reay Bldg 155", "weeks": "7/10" }
+                { "type": "Tutorial", "activity": "02-P1", "day": "Mon", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "3/8-31/8, 21/9-28/9, 12/10-26/10", "staff": null },
+                { "type": "Tutorial Makeup", "activity": "02-P2", "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 3.05_Marie Reay Bldg 155", "weeks": "7/10", "staff": null }
               ]
             },
             {
               "group": "03",
               "free": 0,
               "meetings": [
-                { "day": "Wed", "start": "09:00", "end": "10:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+                { "type": "Tutorial", "activity": "03", "day": "Wed", "start": "09:00", "end": "10:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
               ]
             },
             {
               "group": "04",
               "free": 1,
               "meetings": [
-                { "day": "Wed", "start": "10:30", "end": "12:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+                { "type": "Tutorial", "activity": "04", "day": "Wed", "start": "10:30", "end": "12:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
               ]
             },
             {
               "group": "05",
               "free": 0,
               "meetings": [
-                { "day": "Wed", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+                { "type": "Tutorial", "activity": "05", "day": "Wed", "start": "14:00", "end": "15:30", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
               ]
             },
             {
               "group": "06",
               "free": 0,
               "meetings": [
-                { "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10" }
+                { "type": "Tutorial", "activity": "06", "day": "Wed", "start": "15:30", "end": "17:00", "location": "Rm 4.03_Marie Reay Bldg 155", "weeks": "5/8-2/9, 23/9-28/10", "staff": null }
               ]
             }
           ]

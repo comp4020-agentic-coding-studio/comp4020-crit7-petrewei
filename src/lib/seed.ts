@@ -10,10 +10,13 @@ import { activities, activityId, courses, groupId, groups, meetings } from "./sc
 export function seed(db: BetterSQLite3Database): void {
   db.transaction((tx) => {
     for (const course of timetable.courses) {
-      tx.insert(courses)
-        .values({ code: course.code, title: course.title })
-        .onConflictDoUpdate({ target: courses.code, set: { title: course.title } })
-        .run();
+      const courseRow = {
+        code: course.code,
+        title: course.title,
+        classNumber: course.class,
+        sharedWith: course.sharedWith.join(", "),
+      };
+      tx.insert(courses).values(courseRow).onConflictDoUpdate({ target: courses.code, set: courseRow }).run();
 
       for (const activity of course.activities) {
         const activityRow = {
