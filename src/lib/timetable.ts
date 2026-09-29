@@ -1,19 +1,19 @@
-import { type Commitment, clashesFor, meetingsClash } from "./clash";
+import { type Commitment, clashesFor, isOneOff, meetingsClash } from "./clash";
 import { db } from "./db";
 import { activities, courses, groups, meetings, preferences } from "./schema";
 
-export type MeetingView = typeof meetings.$inferSelect;
+type MeetingView = typeof meetings.$inferSelect;
 
-export type GroupView = {
+type GroupView = {
   id: string;
   label: string;
   free: number | null;
   allocated: boolean;
   meetings: MeetingView[];
-  clashes: Commitment[];
+  clashes: Commitment<MeetingView>[];
 };
 
-export type ActivityView = {
+type ActivityView = {
   id: string;
   courseCode: string;
   courseTitle: string;
@@ -22,9 +22,9 @@ export type ActivityView = {
   groups: GroupView[];
 };
 
-// Activities with more than one group are ranked; the rest are fixed
-// commitments such as lectures.
-export type Timetable = { ranked: ActivityView[]; fixed: ActivityView[] };
+// Activities with more than one group are ranked. The commitments are every
+// lecture plus each ranked activity's first choice.
+type Timetable = { ranked: ActivityView[]; commitments: Commitment<MeetingView>[] };
 
 export function loadTimetable(): Timetable {
   const titles = new Map(db.select().from(courses).all().map((c) => [c.code, c.title]));
@@ -61,10 +61,8 @@ export function loadTimetable(): Timetable {
     }));
 
   const ranked = views.filter((a) => a.groups.length > 1);
-  const fixed = views.filter((a) => a.groups.length === 1);
-
-  const commitments: Commitment[] = [
-    ...fixed.map((a) => commitment(a, a.groups[0], false)),
+  const commitments = [
+    ...views.filter((a) => a.groups.length === 1).map((a) => commitment(a, a.groups[0], false)),
     ...ranked.map((a) => commitment(a, a.groups[0], true)),
   ];
   const clashes = clashesFor(commitments);
@@ -72,10 +70,14 @@ export function loadTimetable(): Timetable {
     activity.groups[0].clashes = clashes.get(activity.groups[0].id) ?? [];
   }
 
-  return { ranked, fixed };
+  return { ranked, commitments };
 }
 
-const commitment = (activity: ActivityView, group: GroupView, firstChoice: boolean): Commitment => ({
+const commitment = (
+  activity: ActivityView,
+  group: GroupView,
+  firstChoice: boolean,
+): Commitment<MeetingView> => ({
   id: group.id,
   label: firstChoice
     ? `${activity.courseCode} ${activity.kind} group ${group.label}`
@@ -86,42 +88,33 @@ const commitment = (activity: ActivityView, group: GroupView, firstChoice: boole
 
 // "Thu 11:00–13:00, 30/7 only" for a one-off meeting, else with its weeks.
 export function meetingText(meeting: { day: string; start: string; end: string; weeks: string }): string {
-  const oneOff = !/[-,]/.test(meeting.weeks);
-  const weeks = oneOff ? `${meeting.weeks} only` : `weeks ${meeting.weeks}`;
+  const weeks = isOneOff(meeting.weeks) ? `${meeting.weeks} only` : `weeks ${meeting.weeks}`;
   return `${meeting.day} ${meeting.start}–${meeting.end}, ${weeks}`;
 }
 
-export type WeekEntry = {
-  key: string;
-  title: string;
-  firstChoice: boolean;
-  meeting: MeetingView;
-  clash: boolean;
-};
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
-export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-
-// Every lecture and first-choice meeting, by weekday and start time. An entry
-// is marked when it clashes with a meeting of another commitment.
-export function weekByDay({ ranked, fixed }: Timetable): Map<string, WeekEntry[]> {
-  const commitments = [
-    ...fixed.map((a) => commitment(a, a.groups[0], false)),
-    ...ranked.map((a) => commitment(a, a.groups[0], true)),
-  ];
+// Every commitment's meetings, by weekday and start time. An entry is marked
+// when that meeting clashes with a meeting of another commitment.
+export function weekByDay(commitments: Commitment<MeetingView>[]) {
   const entries = commitments.flatMap((c) =>
     c.meetings.map((meeting, i) => ({
       key: `${c.id}-${i}`,
       owner: c.id,
       title: c.label,
       firstChoice: c.firstChoice,
-      meeting: meeting as MeetingView,
+      meeting,
     })),
   );
-  const byDay = new Map<string, WeekEntry[]>(WEEKDAYS.map((day) => [day, []]));
-  for (const entry of entries) {
-    const clash = entries.some((other) => other.owner !== entry.owner && meetingsClash(entry.meeting, other.meeting));
-    byDay.get(entry.meeting.day)?.push({ ...entry, clash });
-  }
-  for (const list of byDay.values()) list.sort((a, b) => a.meeting.start.localeCompare(b.meeting.start));
-  return byDay;
+  const marked = entries.map((entry) => ({
+    ...entry,
+    oneOff: isOneOff(entry.meeting.weeks),
+    clash: entries.some((other) => other.owner !== entry.owner && meetingsClash(entry.meeting, other.meeting)),
+  }));
+  return WEEKDAYS.map((day) => ({
+    day,
+    entries: marked
+      .filter((entry) => entry.meeting.day === day)
+      .sort((a, b) => a.meeting.start.localeCompare(b.meeting.start)),
+  }));
 }

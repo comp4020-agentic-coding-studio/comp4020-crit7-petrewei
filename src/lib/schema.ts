@@ -8,6 +8,10 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 // migration trail is what keeps old state and new code compatible.
 
 // The timetable, seeded from src/data/timetable-2026-s2.json on every boot.
+// Activity and group ids are derived here only, e.g. COMP3300-ComA-01.
+export const activityId = (courseCode: string, activityCode: string): string => `${courseCode}-${activityCode}`;
+export const groupId = (activity: string, label: string): string => `${activity}-${label}`;
+
 export const courses = sqliteTable("courses", {
   code: text().primaryKey(),
   title: text().notNull(),

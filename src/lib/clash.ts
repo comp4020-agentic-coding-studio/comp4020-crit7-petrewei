@@ -5,11 +5,11 @@ export type Meeting = {
   weeks: string;
 };
 
-export type Commitment = {
+export type Commitment<M extends Meeting = Meeting> = {
   id: string;
   label: string;
   firstChoice: boolean;
-  meetings: Meeting[];
+  meetings: M[];
 };
 
 // Days before each month in 2026, which is not a leap year. Dates stay
@@ -35,6 +35,8 @@ export function parseWeeks(weeks: string): Set<number> {
   return days;
 }
 
+export const isOneOff = (weeks: string): boolean => parseWeeks(weeks).size === 1;
+
 // Times are zero-padded "HH:MM", so string order is time order. Back-to-back
 // meetings, where one ends as the other starts, do not overlap.
 export function meetingsClash(a: Meeting, b: Meeting): boolean {
@@ -44,8 +46,8 @@ export function meetingsClash(a: Meeting, b: Meeting): boolean {
 }
 
 // For each first choice, every other commitment it clashes with.
-export function clashesFor(commitments: Commitment[]): Map<string, Commitment[]> {
-  const clashes = new Map<string, Commitment[]>();
+export function clashesFor<C extends Commitment>(commitments: C[]): Map<string, C[]> {
+  const clashes = new Map<string, C[]>();
   for (const choice of commitments.filter((c) => c.firstChoice)) {
     clashes.set(
       choice.id,

@@ -1,10 +1,9 @@
 ---
-import { loadTimetable, meetingText, WEEKDAYS, weekByDay } from "../lib/timetable";
+import { loadTimetable, meetingText, weekByDay } from "../lib/timetable";
 import "../styles.css";
 
-const timetable = loadTimetable();
-const { ranked } = timetable;
-const week = weekByDay(timetable);
+const { ranked, commitments } = loadTimetable();
+const week = weekByDay(commitments);
 
 // The ranking that pressing "Move up" on position i produces.
 const moveUp = (labels: string[], i: number): string => {
@@ -91,19 +90,19 @@ const freeText = (free: number | null): string =>
         <p class="course">Lectures and your first choices. A meeting marked "clash" overlaps another on at least one date.</p>
         <div class="week">
           {
-            WEEKDAYS.map((day) => (
+            week.map(({ day, entries }) => (
               <div class="day">
                 <h3>{day}</h3>
                 <ul>
-                  {(week.get(day) ?? []).length === 0 && <li class="slot-empty">Nothing on</li>}
-                  {(week.get(day) ?? []).map((entry) => (
+                  {entries.length === 0 && <li class="slot-empty">Nothing on</li>}
+                  {entries.map((entry) => (
                     <li data-slot={entry.key} class:list={{ "first-choice": entry.firstChoice, "slot-clash": entry.clash }}>
                       <span class="slot-time">
                         {entry.meeting.start}–{entry.meeting.end}
                       </span>
                       <span class="slot-title">{entry.title}</span>
                       <span class="slot-where">{entry.meeting.location}</span>
-                      {!/[-,]/.test(entry.meeting.weeks) && <span class="slot-note">{entry.meeting.weeks} only</span>}
+                      {entry.oneOff && <span class="slot-note">{entry.meeting.weeks} only</span>}
                       {entry.clash && <span class="slot-note slot-clash-note">clash</span>}
                     </li>
                   ))}
