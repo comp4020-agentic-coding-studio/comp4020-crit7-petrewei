@@ -7,7 +7,8 @@ import { describe, expect, inject, it } from "vitest";
 // - POST /api/preferences with activity=COURSE-ACT and order=NN,NN,... saves the
 //   ranking and redirects back to / with 303.
 // - The page's own form for an activity submits exactly those two fields, so the
-//   form and the handler cannot drift apart while direct POSTs stay green.
+//   form and the handler cannot drift apart while direct POSTs stay green. It
+//   works without JavaScript: a button named `order` carries the new ranking.
 // - The server rejects an unknown activity or an order that is not exactly the
 //   activity's groups with a 4xx, and the saved ranking is unchanged.
 // - A first choice that overlaps another committed session carries data-clash
@@ -103,11 +104,12 @@ describe("timetable preferences", () => {
     expect(form.getAttribute("method")?.toLowerCase()).toBe("post");
     expect(new URL(form.action, baseUrl).pathname).toBe("/api/preferences");
 
-    // Press a button that would change the ranking, if the form has one.
+    // Without JavaScript, a button named `order` must carry a new ranking.
     const current = rankedGroups(doc, LAB).map((g) => g.slice(LAB.length + 1)).join(",");
     const submitter = [...form.querySelectorAll("button")].find(
       (b) => b.name === "order" && b.value !== current,
     );
+    expect(submitter, "no button named `order` that changes the ranking").toBeDefined();
     const data = formData(form, submitter);
     expect(data.get("activity")).toBe(LAB);
     const order = data.get("order");

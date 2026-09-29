@@ -15,12 +15,13 @@ Where each spec line is held:
 - **Commits, `PROCESS.md` and `reflections/crit-7.md`:** `pnpm check:evidence`.
 - **A real ANU slice, and how I directed, grounded and corrected the work:** judged at the crit.
 
-## 2 Data and Database
+## 2 App and Data
 
 - **Session data comes only from `src/data/timetable-2026-s2.json`, copied from MyTimetable.** If something is missing, say so; an invented session makes every clash result untrue.
 - **Keep my calendar feed URL, uni ID, email and MyTimetable screenshots out of the repo.** It goes public at the cutoff.
 - **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** A first choice is compared with every lecture and with the first choice of every other activity. Meetings overlap when one starts before the other ends, so back-to-back meetings do not clash.
 - **Week dates are calendar dates in 2026, never timestamps.** The Fly server runs in UTC, my machine in Canberra time, and daylight saving starts on 4 October, so a midnight timestamp can fall on a different day.
+- **The ranking form works without JavaScript.** Each group has a button named `order` whose value is the ranking it produces, so the browser's own POST and the 303 redirect do the work (Lecture 7).
 - **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.
 - **Keep `/api/events` when the guestbook goes.** CI's post-deploy job fails without it once the repo is public.
 
@@ -36,6 +37,7 @@ Where each spec line is held:
 - **Return the evidence itself.** Drive the page in a real browser and produce the screenshot, console output, response body, DOM state or exit code.
 - **Observe the saved row as well as the response.** A 303 shows the handler ran; `sqlite3 .data/app.db` shows the row exists. The local and production databases are separate and are each verified in their own environment.
 - **Verify the deployed app after every deploy.** Open the `*.fly.dev` URL, save a ranking and reload, and check that it also survives the next deploy. The tests boot the built server against a fresh database, so a migration that fails against the live data only shows up there.
+- **Check the page at 390×844 as well as at desktop width.** The weekly grid is the part most likely to break on a phone, and jsdom cannot lay out a page, so only a browser shows it.
 - **Spend verification where the flows differ.** Drive the one or two flows that are genuinely distinct and let `pnpm check` cover the rest.
 
 ## 5 Sensors and Checks
