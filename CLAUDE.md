@@ -17,6 +17,8 @@ Where each spec line is held:
 
 ## 2 Data and Database
 
+- **Session data comes only from `src/data/timetable-2026-s2.json`, copied from MyTimetable.** If something is missing, say so; an invented session makes every clash result untrue.
+- **Keep my calendar feed URL, uni ID, email and MyTimetable screenshots out of the repo.** It goes public at the cutoff.
 - **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** A first choice is compared with every lecture and with the first choice of every other activity. Meetings overlap when one starts before the other ends, so back-to-back meetings do not clash.
 - **Week dates are calendar dates in 2026, never timestamps.** The Fly server runs in UTC, my machine in Canberra time, and daylight saving starts on 4 October, so a midnight timestamp can fall on a different day.
 - **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.
