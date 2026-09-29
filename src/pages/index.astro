@@ -1,8 +1,18 @@
 ---
-import { listMessages } from "../lib/db";
+import { loadTimetable, meetingText } from "../lib/timetable";
 import "../styles.css";
 
-const messages = listMessages();
+const { ranked } = loadTimetable();
+
+// The ranking that pressing "Move up" on position i produces.
+const moveUp = (labels: string[], i: number): string => {
+  const next = [...labels];
+  [next[i - 1], next[i]] = [next[i], next[i - 1]];
+  return next.join(",");
+};
+
+const freeText = (free: number | null): string =>
+  free === null ? "" : free === 0 ? "full" : `${free} ${free === 1 ? "place" : "places"} free`;
 ---
 
 <!doctype html>
@@ -10,44 +20,68 @@ const messages = listMessages();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>COMP4020 prototype</title>
+    <title>Tutorial and lab preferences</title>
   </head>
   <body>
     <nav aria-label="site">
-      <a href="/">Guestbook</a>
+      <a href="/">Preferences</a>
       <a href="/readme/">About</a>
     </nav>
     <main>
-      <h1>Guestbook</h1>
+      <h1>Tutorial and lab preferences</h1>
       <p>
-        A minimal full-stack starter: messages live in SQLite on the machine's
-        volume (state survives a reload and a redeploy), and new messages
-        appear in every open tab over a server-sent-events stream — open this
-        page twice and sign it in one. Replace all of this with your own
-        prototype.
+        Second Semester 2026. Rank the groups for each activity: the top one is your first choice. A
+        first choice that overlaps a lecture or another first choice is flagged with what it clashes
+        with. Sessions and free places were copied from MyTimetable on 29 September 2026.
       </p>
-      <form method="post" action="/api/messages">
-        <label for="body">Leave a message</label>
-        <input id="body" name="body" required maxlength="500" />
-        <button>Sign</button>
-      </form>
-      <ul id="messages">
-        {messages.map((message) => <li>{message.body}</li>)}
-      </ul>
+
+      {
+        ranked.map((activity) => {
+          const labels = activity.groups.map((group) => group.label);
+          return (
+            <section data-activity={activity.id} aria-labelledby={`heading-${activity.id}`}>
+              <h2 id={`heading-${activity.id}`}>
+                {activity.courseCode} {activity.kind}
+              </h2>
+              <p class="course">{activity.courseTitle}</p>
+              <form method="post" action="/api/preferences">
+                <input type="hidden" name="activity" value={activity.id} />
+                <ol class="ranking">
+                  {activity.groups.map((group, i) => (
+                    <li data-group={group.id} data-clash={group.clashes.length > 0 ? "" : undefined}>
+                      <div class="group-head">
+                        <span class="group-name">Group {group.label}</span>
+                        {group.allocated && <span class="tag">allocated</span>}
+                        <span class="free">{freeText(group.free)}</span>
+                      </div>
+                      <ul class="meetings">
+                        {group.meetings.map((meeting) => (
+                          <li>
+                            {meetingText(meeting)} · {meeting.location}
+                          </li>
+                        ))}
+                      </ul>
+                      {group.clashes.length > 0 && (
+                        <p class="clash">
+                          Clashes with{" "}
+                          {group.clashes
+                            .map((c) => `${c.label} (${c.meetings.map(meetingText).join("; ")})`)
+                            .join(" and ")}
+                        </p>
+                      )}
+                      {i > 0 && (
+                        <button name="order" value={moveUp(labels, i)} aria-label={`Move up group ${group.label}`}>
+                          Move up
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </form>
+            </section>
+          );
+        })
+      }
     </main>
-    <script>
-      // The live half of the demo: subscribe to the SSE stream and prepend
-      // messages as they arrive. The form itself needs none of this — its
-      // POST + redirect re-renders the submitting tab from SQLite; this
-      // stream is how every other tab finds out.
-      const list = document.querySelector("#messages");
-      const source = new EventSource("/api/events");
-      source.addEventListener("message", (event) => {
-        const message = JSON.parse(event.data);
-        const item = document.createElement("li");
-        item.textContent = message.body;
-        list?.prepend(item);
-      });
-    </script>
   </body>
 </html>

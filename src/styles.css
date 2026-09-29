@@ -1,13 +1,20 @@
 body {
   margin: 0;
-  padding: 2rem;
+  padding: 1.5rem 1rem;
   font-family: system-ui, sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #1a1a1a;
 }
 
+nav {
+  display: flex;
+  gap: 1rem;
+  max-width: 48rem;
+  margin: 0 auto 1rem;
+}
+
 main {
-  max-width: 40rem;
+  max-width: 48rem;
   margin: 0 auto;
 }
 
@@ -15,26 +22,76 @@ a {
   color: #0b5fff;
 }
 
-form {
+section {
+  margin-block: 2rem;
+}
+
+h2 {
+  margin-bottom: 0;
+}
+
+.course {
+  margin-top: 0;
+  color: #555;
+}
+
+.ranking {
+  padding-inline-start: 1.5rem;
+}
+
+.ranking > li {
+  margin-block: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.ranking > li:first-child {
+  border-width: 2px;
+  border-color: #1a1a1a;
+}
+
+.ranking > li[data-clash] {
+  border-color: #b00020;
+  background: #fff4f5;
+}
+
+.group-head {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  align-items: center;
-  margin-block: 1.5rem;
+  align-items: baseline;
 }
 
-input {
-  flex: 1;
-  min-width: 12rem;
-  padding: 0.4rem 0.6rem;
-  font: inherit;
+.group-name {
+  font-weight: 600;
+}
+
+.tag {
+  padding: 0 0.4rem;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.free {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.meetings {
+  margin: 0.3rem 0;
+  padding-inline-start: 1.1rem;
+  font-size: 0.95rem;
+}
+
+.clash {
+  margin: 0.4rem 0;
+  color: #b00020;
+  font-weight: 600;
 }
 
 button {
-  padding: 0.4rem 1rem;
+  padding: 0.3rem 0.9rem;
   font: inherit;
-}
-
-#messages {
-  padding-inline-start: 1.2rem;
 }
