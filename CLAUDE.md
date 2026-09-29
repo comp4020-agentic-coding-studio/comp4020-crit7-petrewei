@@ -11,13 +11,14 @@ Crit 7, week 8: build the ANU system you wish existed. The slice is MyTimetable'
 Where each spec line is held:
 
 - **Loads at its `*.fly.dev` URL by the cutoff:** checked by hand after every deploy (§4).
-- **Core flow persists across a reload:** `spec/timetable.test.ts`, which also holds the clash contract.
+- **Core flow persists across a reload:** `spec/timetable.test.ts`, which also holds the clash contract, and `spec/restart.test.ts` for a restart.
 - **Commits, `PROCESS.md` and `reflections/crit-7.md`:** `pnpm check:evidence`.
 - **A real ANU slice, and how I directed, grounded and corrected the work:** judged at the crit.
 
 ## 2 Data and Database
 
-- **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** A first choice is compared with every lecture and with the first choice of every other activity.
+- **Two meetings clash when they fall on the same weekday, overlap in time, and share at least one date in their weeks.** A first choice is compared with every lecture and with the first choice of every other activity. Meetings overlap when one starts before the other ends, so back-to-back meetings do not clash.
+- **Week dates are calendar dates in 2026, never timestamps.** The Fly server runs in UTC, my machine in Canberra time, and daylight saving starts on 4 October, so a midnight timestamp can fall on a different day.
 - **Change the schema in `src/lib/schema.ts` and generate a migration with `pnpm db:generate`; never edit a committed migration.** The Fly volume has already applied it and will not run it again.
 - **Keep `/api/events` when the guestbook goes.** CI's post-deploy job fails without it once the repo is public.
 
@@ -32,7 +33,7 @@ Where each spec line is held:
 
 - **Return the evidence itself.** Drive the page in a real browser and produce the screenshot, console output, response body, DOM state or exit code.
 - **Observe the saved row as well as the response.** A 303 shows the handler ran; `sqlite3 .data/app.db` shows the row exists. The local and production databases are separate and are each verified in their own environment.
-- **Verify the deployed app after every deploy.** Open the `*.fly.dev` URL, save a ranking and reload, and check that it also survives the next deploy. The tests boot the built server against a throwaway database, so a migration or seed that fails on the Fly volume only shows up there.
+- **Verify the deployed app after every deploy.** Open the `*.fly.dev` URL, save a ranking and reload, and check that it also survives the next deploy. The tests boot the built server against a fresh database, so a migration that fails against the live data only shows up there.
 - **Spend verification where the flows differ.** Drive the one or two flows that are genuinely distinct and let `pnpm check` cover the rest.
 
 ## 5 Sensors and Checks
