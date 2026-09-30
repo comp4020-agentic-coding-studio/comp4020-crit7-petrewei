@@ -27,3 +27,6 @@ mise.local.toml
 .claude/*
 !.claude/settings.json
 !.claude/hooks/
+
+# the browser tool's screenshots may show a logged-in MyTimetable page
+.playwright-mcp/
