@@ -53,7 +53,7 @@ Where each spec line is held:
 
 - **Commit small and often, and say why in the message.** The commit trail is evidence of process; the diff shows what changed, and the message is the only place the reason survives.
 - **Commit only on green.** Stage files by name. The one exception is a check written ahead of the thing that satisfies it: red on purpose, and the message says so.
-- **Push straight after every commit, without asking.** The marker and CI only see what is on GitHub.
+- **Push once after a change's commits, without asking.** Every push to `main` queues a CI run behind the one before it, so a code commit and its `PROCESS.md` commit pushed apart make the second wait about three minutes.
 - **Read a red CI run properly.** `gh run watch`, then `gh run view --log-failed`, for the actual failing command and its output instead of "the build failed".
 - **Only put a number in a commit message you have just measured.** Read it from the command output in the same step as writing the message.
 
