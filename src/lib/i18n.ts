@@ -109,6 +109,6 @@ export const STRINGS: Record<Locale, typeof en> = { en, zh };
 // The same page in the other language, keeping the query string, so the
 // week on screen stays on screen.
 export const counterpart = (url: URL, locale: Locale): string => {
-  const path = locale === "zh" ? url.pathname.replace(/^\/zh(?=\/)/, "") : `/zh${url.pathname}`;
+  const path = locale === "zh" ? url.pathname.replace(/^\/zh(?=\/|$)/, "") || "/" : `/zh${url.pathname}`;
   return path + url.search;
 };

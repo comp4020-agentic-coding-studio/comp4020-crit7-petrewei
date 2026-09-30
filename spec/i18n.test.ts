@@ -127,10 +127,19 @@ describe("language switch", () => {
     ["/readme/", "/zh/readme/", "zh-CN"],
     ["/zh/", "/", "en-AU"],
     ["/zh/readme/", "/readme/", "en-AU"],
+    ["/zh", "/", "en-AU"],
+    ["/zh?week=3", "/?week=3", "en-AU"],
   ])("links %s to %s", async (from, to, hreflang) => {
     const link = (await page(from)).querySelector(`header a[hreflang="${hreflang}"]`);
     expect(link?.getAttribute("href")).toBe(to);
     expect(link?.getAttribute("lang")).toBe(hreflang);
+  });
+
+  it("marks the timetable as the current page on /zh with or without its slash", async () => {
+    for (const path of ["/zh", "/zh/"]) {
+      const current = (await page(path)).querySelector('header nav a[aria-current="page"]');
+      expect(current?.getAttribute("href"), path).toBe("/zh/");
+    }
   });
 
   it("keeps the Chinese pages' own links in Chinese", async () => {
