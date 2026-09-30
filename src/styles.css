@@ -209,7 +209,8 @@ summary {
 }
 
 button {
-  padding: 0 0.45rem;
+  min-height: 1.5rem;
+  padding: 0.2rem 0.6rem;
   border: 1px solid var(--accent);
   border-radius: 4px;
   background: #fff;

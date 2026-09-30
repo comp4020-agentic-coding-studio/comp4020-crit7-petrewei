@@ -155,9 +155,17 @@ const regular = <M extends { type: string }>(meetings: M[]): M[] => meetings.fil
     </main>
     <script>
       // Without JavaScript the Show button submits the slider's week; with it,
-      // letting go of the slider does.
+      // letting go of a dragged slider does. A key press also fires `change`,
+      // and submitting then would reload the page on every step, so the keys
+      // move the slider and Show submits.
       const slider = document.querySelector<HTMLInputElement>("#week-slider");
-      slider?.addEventListener("change", () => slider.form?.requestSubmit());
+      let dragged = false;
+      slider?.addEventListener("pointerdown", () => (dragged = true));
+      slider?.addEventListener("change", () => {
+        if (!dragged) return;
+        dragged = false;
+        slider.form?.requestSubmit();
+      });
     </script>
   </body>
 </html>
