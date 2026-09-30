@@ -277,6 +277,40 @@ main.prose {
   color: #fff;
 }
 
+.week-slider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.8rem;
+  font-size: 0.9rem;
+}
+
+.week-slider label {
+  font-weight: 600;
+}
+
+.week-slider input {
+  flex: 1 1 8rem;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.week-slider-ends {
+  color: var(--muted);
+}
+
+.week-slider button {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .week-range {
   font-weight: 600;
 }

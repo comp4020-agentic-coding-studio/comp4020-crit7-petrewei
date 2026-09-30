@@ -13,6 +13,9 @@ import { LAB, page, record, restoreAllocation, TUT } from "./app";
 //   a makeup session says it is one. A lab reads "Lab", not "Computer lab".
 // - Links with rel="prev" and rel="next" go to the neighbouring weeks, and
 //   are absent at either end.
+// - A slider, input[type=range] named week from 1 to 14 at the week shown, sits
+//   in a GET form to the same page with its own submit button, so it works
+//   without JavaScript. On /zh/ the form goes to /zh/.
 // - Without ?week, or with one outside 1–14, the page shows the week holding
 //   today's date in Canberra, or the nearest end of the semester.
 const LAST_WEEK = 14;
@@ -133,6 +136,28 @@ describe("your week", () => {
 
     expect(link(await weekPage("?week=1"), "prev")).toBeNull();
     expect(link(await weekPage(`?week=${LAST_WEEK}`), "next")).toBeNull();
+  });
+
+  it.each([
+    ["/", "/"],
+    ["/zh/", "/zh/"],
+  ])("offers a week slider on %s that submits to %s", async (path, action) => {
+    const doc = await page(`${path}?week=3`);
+    const slider = doc.querySelector<HTMLInputElement>('[data-week] input[type="range"]');
+    if (!slider) throw new Error("no range input in the week section");
+    expect([slider.name, slider.min, slider.max, slider.value]).toEqual(["week", "1", String(LAST_WEEK), "3"]);
+    expect(slider.labels?.length).toBe(1);
+    const form = slider.form!;
+    expect(form.method).toBe("get");
+    expect(form.getAttribute("action")).toBe(action);
+    const submit = form.querySelector<HTMLButtonElement>('button:not([type="button"])');
+    if (!submit) throw new Error("the slider's form has no submit button");
+
+    slider.value = "9";
+    const data = new form.ownerDocument.defaultView!.FormData(form, submit);
+    const query = new URLSearchParams([...data].map(([name, value]) => [name, String(value)]));
+    expect([...query]).toEqual([["week", "9"]]);
+    expect(shownWeek(await page(`${action}?${query}`))).toBe(9);
   });
 
   it.each(["", "?week=0", "?week=99", "?week=abc"])(

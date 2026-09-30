@@ -151,6 +151,7 @@ export function weekView(calendar: Item[], requested: string | null) {
     number,
     prev: number > 1 ? number - 1 : null,
     next: number < last ? number + 1 : null,
+    last,
     days,
   };
 }

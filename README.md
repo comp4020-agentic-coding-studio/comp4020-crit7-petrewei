@@ -12,9 +12,9 @@ It models my own Second Semester 2026 timetable (COMP3300, COMP3500 and COMP4020
 
 - **Groups at a glance.** Each lab and tutorial lists its groups with their regular times and free places, and each COMP4020 tutorial group its name and tutor. A card's details give every meeting's type, dates and room, including one-off makeups such as a tutorial moved for a public holiday.
 - **Record an allocation.** Press Allocate on a group to record it. The allocation is saved in SQLite, so it survives a reload, a restart and a redeploy.
-- **Your week.** A Monday-to-Friday calendar of your lectures and allocated groups for the chosen teaching week, with previous and next week links.
+- **Your week.** A Monday-to-Friday calendar of your lectures and allocated groups for the chosen teaching week, with previous and next week links and a slider to jump to any week.
 - **Clashes on the right dates.** Two meetings clash when they fall on the same weekday, overlap in time, and share a date. A one-off meeting clashes only in its own week: the COMP3500 lecture on 30 July clashes with lab 01 that week alone.
-- **No JavaScript needed.** Each Allocate button is a form button and week navigation is plain links, and the server rejects a group the activity does not have.
+- **No JavaScript needed.** Each Allocate button is a form button and week navigation is plain links and a slider in a form with its own Show button, and the server rejects a group the activity does not have.
 - **Simplified Chinese.** Both pages are also at `/zh/` and `/zh/readme/`, with course titles and labels translated and course codes, activity codes, group labels, rooms and times left as MyTimetable gives them.
 
 ## Data

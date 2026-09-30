@@ -120,6 +120,13 @@ const place = (location: string): string[] => location.split("_");
           </span>
           {week.next ? <a href={weekHref(week.next)} rel="next">{t.nextWeek}</a> : <span />}
         </nav>
+        <form class="week-slider" method="get" action={`${t.prefix}/`}>
+          <label for="week-slider">{t.chooseWeek}</label>
+          <span class="week-slider-ends">1</span>
+          <input id="week-slider" type="range" name="week" min="1" max={week.last} value={week.number} />
+          <span class="week-slider-ends">{week.last}</span>
+          <button>{t.showWeek}</button>
+        </form>
         <div class="week">
           {
             week.days.map(({ day, date, entries }) => (
@@ -149,5 +156,11 @@ const place = (location: string): string[] => location.split("_");
         </div>
       </section>
     </main>
+    <script>
+      // Without JavaScript the Show button submits the slider's week; with it,
+      // letting go of the slider does.
+      const slider = document.querySelector<HTMLInputElement>("#week-slider");
+      slider?.addEventListener("change", () => slider.form?.requestSubmit());
+    </script>
   </body>
 </html>
