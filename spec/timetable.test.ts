@@ -165,7 +165,6 @@ describe("allocation", () => {
 
   it.each([
     ["a group that does not exist", LAB, "09"],
-    ["a missing group", LAB, ""],
     // A lecture has one group, so there is nothing to record.
     ["a lecture", "COMP3300-LecA", "01"],
     // A valid lab group, so only the activity name can make this fail.

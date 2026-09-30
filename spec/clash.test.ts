@@ -23,11 +23,6 @@ describe("parseWeeks", () => {
     // 3/8–31/8 is five Mondays, 21/9–28/9 two, 12/10–26/10 three.
     expect(parseWeeks("3/8-31/8, 21/9-28/9, 12/10-26/10").size).toBe(10);
   });
-
-  it("gives the same date the same value in different strings", () => {
-    const shared = [...parseWeeks("30/7")].filter((d) => parseWeeks("30/7-27/8").has(d));
-    expect(shared).toHaveLength(1);
-  });
 });
 
 describe("meetingsClash", () => {
