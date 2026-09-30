@@ -73,7 +73,13 @@ describe("Simplified Chinese timetable", () => {
   it.each(["1", "11"])("leaves no English word in week %s but codes, rooms and lecturers", async (week) => {
     await record(TUT, "01");
     const doc = await page(`/zh/?week=${week}`);
-    let text = squash(doc.querySelector("main")?.textContent);
+    // The link to the English page is named in English on purpose, and scripts are not text.
+    doc.querySelectorAll("script, style, [hreflang]").forEach((el) => el.remove());
+    // Each text node stands alone, so names in neighbouring elements do not run together.
+    const walker = doc.createTreeWalker(doc.body, 4 /* NodeFilter.SHOW_TEXT */);
+    const nodes: string[] = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) nodes.push(squash(node.textContent));
+    let text = nodes.filter(Boolean).join(" ");
     expect(text).toContain("第 " + week + " 周");
     if (week === "1") expect(text).toMatch(/COMP3500 讲座（LecA）.*冲突/);
     if (week === "11") expect(text).toContain("辅导补课");
@@ -83,8 +89,12 @@ describe("Simplified Chinese timetable", () => {
         a.groups.flatMap((g) => [g.name ?? "", g.tutor ?? "", ...g.meetings.flatMap((m) => [...m.location.split("_"), m.staff ?? ""])]),
       ),
     );
-    for (const name of names.filter(Boolean)) text = text.replaceAll(name, "");
-    const codes = /COMP\d{4}|\b(Lec|Com|Tut)[A-Z]\b/g;
+    // Only a whole name is exempt, so an English label cannot hide inside one.
+    const escaped = [...new Set(names.filter(Boolean))]
+      .sort((a, b) => b.length - a.length)
+      .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    text = text.replace(new RegExp(`(?<![A-Za-z])(?:${escaped.join("|")})(?![A-Za-z])`, "g"), "");
+    const codes = /COMP\d{4}|ANU|\b(Lec|Com|Tut)[A-Z]\b/g;
     expect(text.replace(codes, "").match(/[A-Za-z]{2,}/g)).toBeNull();
   });
 

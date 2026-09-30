@@ -168,18 +168,16 @@ describe("your week", () => {
   );
 });
 
-// Week 1 starts on Monday 27 July 2026, day 208 of the year. Today's date is
-// read in Canberra's time zone, as calendar parts rather than a timestamp.
+// The Monday of each week, written out rather than counted from week 1, so
+// this cannot share an arithmetic mistake with the app. Today's date is read
+// in Canberra's time zone as text, and the week is the last Monday on or
+// before it, or the nearest end.
+const MONDAYS = [
+  "2026-07-27", "2026-08-03", "2026-08-10", "2026-08-17", "2026-08-24", "2026-08-31", "2026-09-07",
+  "2026-09-14", "2026-09-21", "2026-09-28", "2026-10-05", "2026-10-12", "2026-10-19", "2026-10-26",
+];
+
 function currentWeek(): number {
-  const parts = new Intl.DateTimeFormat("en-AU", {
-    timeZone: "Australia/Sydney",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  }).formatToParts(new Date());
-  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  const today = Date.UTC(part("year"), part("month") - 1, part("day"));
-  const weekOne = Date.UTC(2026, 6, 27);
-  const week = Math.floor((today - weekOne) / (7 * 86_400_000)) + 1;
-  return Math.min(Math.max(week, 1), LAST_WEEK);
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney" }).format(new Date());
+  return Math.max(1, MONDAYS.filter((monday) => monday <= today).length);
 }
