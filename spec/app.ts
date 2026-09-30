@@ -8,6 +8,9 @@ export const baseUrl = inject("baseUrl");
 export const LAB = "COMP3300-ComA";
 export const TUT = "COMP4020-TutA";
 
+// Text with every run of whitespace as one space, as it reads on screen.
+export const squash = (s: string | null | undefined): string => (s ?? "").replace(/\s+/g, " ").trim();
+
 // The page at `path`, parsed as a browser would.
 export const page = async (path = "/", base = baseUrl): Promise<Document> => {
   const res = await fetch(new URL(path, base));

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocation, TUT } from "./app";
+import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocation, squash, TUT } from "./app";
 
 // Contract for the allocation page, checked over HTTP against the built app:
 // - GET / lists each lab and tutorial as [data-activity="COURSE-ACT"], holding
@@ -119,16 +119,16 @@ describe("allocation", () => {
   it("names each activity's course by its title alone", async () => {
     const doc = await page();
     const course = (activity: string) =>
-      doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent?.replace(/\s+/g, " ").trim();
+      squash(doc.querySelector(`[data-activity="${activity}"] .course`)?.textContent);
     expect(course(LAB)).toBe("Operating Systems Implementation");
-    expect(doc.querySelector(`[data-activity="${LAB}"] h2`)?.textContent?.replace(/\s+/g, " ").trim()).toBe("COMP3300 Lab");
+    expect(squash(doc.querySelector(`[data-activity="${LAB}"] h2`)?.textContent)).toBe("COMP3300 Lab");
     expect(course(TUT)).toBe("Advanced Topics in Human-Centred Agentic Coding Studio");
   });
 
   it("gives each meeting's type and activity code in the card's details", async () => {
     const doc = await page();
     const details = (group: string) =>
-      groupItem(doc, group).querySelector("details")?.textContent?.replace(/\s+/g, " ") ?? "";
+      squash(groupItem(doc, group).querySelector("details")?.textContent);
     expect(details(`${LAB}-04`)).toContain("Laboratory 04");
     expect(details(`${LAB}-04`)).not.toContain("Computer");
     expect(details(`${TUT}-01`)).toMatch(/Tutorial 01-P1.*Tutorial Makeup 01-P2/);
@@ -137,9 +137,7 @@ describe("allocation", () => {
 
   it("puts a meeting's room and building on separate lines", async () => {
     const doc = await page();
-    const lines = [...groupItem(doc, `${LAB}-01`).querySelectorAll(".meetings li > span")].map((el) =>
-      el.textContent?.replace(/\s+/g, " ").trim(),
-    );
+    const lines = [...groupItem(doc, `${LAB}-01`).querySelectorAll(".meetings li > span")].map((el) => squash(el.textContent));
     expect(lines.slice(-2)).toEqual(["Comp Lab 1.24", "Hanna Neumann Bldg 145"]);
     expect(doc.querySelector("main")?.textContent).not.toContain("_");
   });
@@ -147,7 +145,7 @@ describe("allocation", () => {
   it("gives each COMP4020 tutorial card its group's name and tutor", async () => {
     const doc = await page();
     const line = (group: string, selector: string) =>
-      groupItem(doc, group).querySelector(selector)?.textContent?.replace(/\s+/g, " ").trim();
+      squash(groupItem(doc, group).querySelector(selector)?.textContent);
     const tutorials = ["01", "02", "03", "04", "05", "06"].map((g) => [
       line(`${TUT}-${g}`, ".team"),
       line(`${TUT}-${g}`, ".tutor"),
@@ -161,9 +159,7 @@ describe("allocation", () => {
       ["Liùrú", "Tutor: Bill McAlister"],
     ]);
     expect(doc.querySelectorAll(`[data-activity="${TUT}"] .card-head .group-name + .team`)).toHaveLength(6);
-    expect(groupItem(doc, `${TUT}-01`).querySelector(".group-title")?.textContent?.replace(/\s+/g, " ").trim()).toBe(
-      "Group 01 Shítāo",
-    );
+    expect(squash(groupItem(doc, `${TUT}-01`).querySelector(".group-title")?.textContent)).toBe("Group 01 Shítāo");
     expect(doc.querySelectorAll(`[data-activity="${LAB}"] :is(.team, .tutor)`)).toHaveLength(0);
   });
 

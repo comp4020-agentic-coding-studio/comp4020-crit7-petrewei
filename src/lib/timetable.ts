@@ -10,7 +10,9 @@ import { db } from "./db";
 import type { EntryName } from "./i18n";
 import { activities, allocations, courses, groups, meetings } from "./schema";
 
-type MeetingView = typeof meetings.$inferSelect;
+// MyTimetable joins a room and its building with "_", as in
+// "Rm 4.03_Marie Reay Bldg 155"; `place` holds each on its own line.
+type MeetingView = typeof meetings.$inferSelect & { place: string[] };
 
 type GroupView = {
   id: string;
@@ -40,7 +42,7 @@ type Timetable = { choosable: ActivityView[]; commitments: Item[] };
 export function loadTimetable(): Timetable {
   const courseRows = new Map(db.select().from(courses).all().map((c) => [c.code, c]));
   const recorded = new Map(db.select().from(allocations).all().map((a) => [a.activityId, a.groupLabel]));
-  const meetingRows = db.select().from(meetings).all();
+  const meetingRows = db.select().from(meetings).all().map((m) => ({ ...m, place: m.location.split("_") }));
   const groupRows = db.select().from(groups).all();
 
   const views: ActivityView[] = db

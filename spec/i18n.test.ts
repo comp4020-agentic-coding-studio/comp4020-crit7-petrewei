@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { COURSE_TITLES_ZH } from "../src/lib/i18n";
-import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocation, TUT } from "./app";
+import { allocatedOf, baseUrl, groupsOf, LAB, page, post, record, restoreAllocation, squash, TUT } from "./app";
 
 // Contract for the Simplified Chinese pages, checked over HTTP:
 // - /zh/ is the timetable and /zh/readme/ the About page, in zh-CN. Each page's
@@ -25,8 +25,6 @@ type Timetable = {
   }[];
 };
 const timetable: Timetable = JSON.parse(readFileSync("src/data/timetable-2026-s2.json", "utf8"));
-
-const squash = (s: string | null | undefined): string => (s ?? "").replace(/\s+/g, " ").trim();
 
 beforeEach(restoreAllocation);
 
